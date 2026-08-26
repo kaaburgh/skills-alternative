@@ -35,6 +35,8 @@ Two closure checks reviewed the revised roadmap only for ways its decision could
 7. **Three slots did not guarantee three alternatives.** Every card now requires pairwise-distinct, non-self target canonical IDs from distinct canonical identity groups; duplicated versions, copies, and forks cannot fill the 300-edge contract.
 8. **An early close could leave a sibling item runnable.** The early-close procedure now drops every other unstarted Cycle 1 item, including ready/open siblings, and reconciles every partially executed item.
 
+After these fixes, the context-isolated reviewer returned **Publish: Yes** with no remaining Critical or High findings.
+
 ## Residual limitations accepted for Cycle 1
 
 - Twenty paired cards remain a small directional audit even with the stronger 15/20 bar.
