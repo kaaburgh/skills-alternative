@@ -4,7 +4,7 @@ This document records why the first roadmap was revised. It is an audit note, no
 
 ## Review boundary
 
-The first draft is preserved in git commit `828691b` (`Bootstrap ARK and add first experiment roadmap`). A context-isolated reviewer was given that repository state, the original product brief, and ARK 0.1.16 guidance, but not the drafting rationale. The reviewer was another agent, not a human or institution; “independent” here means independent drafting context and an adversarial assignment.
+The first draft is preserved in GitHub commit [`d4182bb`](https://github.com/kaaburgh/skills-alternative/commit/d4182bb0eedc734d4e2862660e38bd6209d379d1) (`Bootstrap ARK and add first experiment roadmap`). A context-isolated reviewer was given that repository state, the original product brief, and ARK 0.1.16 guidance, but not the drafting rationale. The reviewer was another agent, not a human or institution; “independent” here means independent drafting context and an adversarial assignment.
 
 The review goal was narrow: find ways the roadmap could formally reach Keep/Pivot without producing a trustworthy answer about the prototype.
 
@@ -24,7 +24,7 @@ The review goal was narrow: find ways the roadmap could formally reach Keep/Pivo
 
 ## Closure review
 
-A second adversarial pass reviewed the revised roadmap only for ways its decision could still be gamed or become unreachable. It found five additional blockers, all incorporated before publication:
+Two closure checks reviewed the revised roadmap only for ways its decision could still be gamed or become unreachable. They found eight additional blockers, all incorporated before publication:
 
 1. **An early failure could block the item that writes the decision.** Every item that triggers Rule 0 or an early substantive Kill now owns an explicit early-close procedure: write the Kill artifact and available metrics, preserve the evidence and counter-interpretation, drop blocked successors with reasons, and leave the ARK graph consistent.
 2. **A commit timestamp was not a trustworthy sampling boundary.** The binding freeze now requires a successful named GitHub-hosted workflow. Sampling uses its server-recorded completion time, immutable run identity and commit SHA, plus the first qualifying later NIST Beacon pulse. Re-running or replacing the successful freeze invalidates the experiment.
