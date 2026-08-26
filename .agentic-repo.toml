@@ -1,0 +1,19 @@
+kit_version = 1
+profiles = ["core"]
+
+[project]
+name = "skills-alternative"
+kind = "evidence-aggregation prototype for public agent skills"
+roadmap = "ROADMAP.md"
+
+[workflow]
+cloud_first = true
+
+[local]
+policy_files = ["docs/agent-policy.local.md"]
+
+[roadmap]
+enforce_status_vocabulary = true
+ready_floor = 1
+ready_floor_fraction = 0.1
+chokepoint_fraction = 0.5
