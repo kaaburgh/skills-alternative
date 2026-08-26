@@ -156,6 +156,24 @@ This is the only path that may close Cycle 1 without `SA-015`.
 
 ## Executable roadmap
 
+### Execution vocabulary
+
+`Execution` is a closed grammar, not free text. Each value begins with exactly one base term and may carry
+one or both qualifiers:
+
+| Term | Meaning |
+| --- | --- |
+| `CLOUD` | executable end to end by a cloud coding agent |
+| `CLOUD RESEARCH` | cloud-executable, but the deliverable is feasibility or access knowledge rather than final artifacts |
+| `HUMAN GATED` | the deliverable is a human action; no cloud path completes the item |
+| `LOCAL ONLY` | requires a workstation; unused in Cycle 1 and permitted only after a documented feasibility result |
+| `+ GATED (<reason>)` | must not start until the named external dependency resolves |
+| `+ HUMAN (<bounded role>)` | cloud work containing a bounded human judgment; the parenthetical names the task |
+
+`+ HUMAN (<role>)` names the task, never the person. Who may perform a given role — in particular whether a
+role may be performed by whoever built the pipeline — is an evaluator-independence question settled by
+`SA-000` and `SA-003`, not by this field.
+
 ### SA-000 — Secure an independent human evaluator and sealed handoff
 
 - **Status:** Open
@@ -174,7 +192,7 @@ This is the only path that may close Cycle 1 without `SA-015`.
 
 - **Status:** Investigation first
 - **Priority:** Critical
-- **Execution:** CLOUD RESEARCH / GATED on permitted skills.sh authentication or operator capture
+- **Execution:** CLOUD RESEARCH + GATED (permitted skills.sh authentication, or an operator capture of the same request)
 - **Category:** Acquisition gate
 - **Depends on:** None
 - **Problem / question:** Can Cycle 1 obtain the exact official ranking it claims to study without a hand-picked fallback?
@@ -224,13 +242,18 @@ This is the only path that may close Cycle 1 without `SA-015`.
 - **Expected information gain:** Tests whether “provenance-aware” survives serialization rather than existing only in prose.
 - **Validation / acceptance:** Fixtures cover republished evidence, unknown lineage, stale version, true conflict, non-comparability, missing comparator, fork/copy alternative, unsupported synthesis, and an unlogged edit. Clean-checkout validation proves layer boundaries and manifest hash reconciliation.
 - **Artifacts / docs:** `schema/`, `tests/fixtures/`, validation code under one chosen source root
-- **Estimated scope:** Medium
+- **Slice budget:** 0/3
+- **Remaining slices:** (1) observation/claim/card layer schemas, the manifest schema, and the hash-linking
+  validator, using the `SA-002` smoke output as the first real fixture; (2) identity, lineage, source-attempt,
+  alternative-edge, and baseline-view schemas with their validators; (3) the adversarial fixture suite covering
+  all nine named cases, plus clean-checkout layer-boundary and manifest-reconciliation validation.
+- **Estimated scope:** Large
 
 ### SA-005 — Resolve and audit the 100-entity cohort
 
 - **Status:** Blocked (SA-004)
 - **Priority:** Critical
-- **Execution:** CLOUD plus bounded human identity audit
+- **Execution:** CLOUD + HUMAN (bounded identity audit)
 - **Category:** Identity / cohort
 - **Depends on:** SA-001, SA-004
 - **Problem / question:** Can ranked rows be joined to stable skill entities without duplicate inflation or evidence crossing identities?
@@ -280,13 +303,18 @@ This is the only path that may close Cycle 1 without `SA-015`.
 - **Expected information gain:** Tests the central synthesis layer before it sees any confirmatory outcome.
 - **Validation / acceptance:** Every generated sentence cites claim/observation IDs; unsupported text fails generation; republished evidence counts once; baseline completeness passes against native calibration captures; no composite quality score is introduced.
 - **Artifacts / docs:** synthesis/renderer code/tests, `02-claims/calibration/`, `03-cards/calibration/`
-- **Estimated scope:** Medium
+- **Slice budget:** 0/3
+- **Remaining slices:** (1) claim typing, comparability, and conflict classification on calibration entities
+  and adversarial fixtures; (2) equivalent-format baseline extraction with completeness checked against the
+  native calibration captures; (3) composite rendering with generation-time citation enforcement, so
+  unsupported text fails generation rather than being reviewed out later.
+- **Estimated scope:** Large
 
 ### SA-009 — Freeze the alternatives method on calibration only
 
 - **Status:** Blocked (SA-007)
 - **Priority:** High
-- **Execution:** CLOUD plus bounded calibration judgments
+- **Execution:** CLOUD + HUMAN (bounded calibration judgments)
 - **Category:** Alternatives graph
 - **Depends on:** SA-005, SA-007
 - **Problem / question:** Can a bounded, frozen universe yield substitutes for the same job rather than similar names, complements, siblings, or copies?
@@ -302,9 +330,9 @@ This is the only path that may close Cycle 1 without `SA-015`.
 - **Priority:** Critical
 - **Execution:** CLOUD
 - **Category:** Data prototype
-- **Depends on:** SA-008, SA-009
+- **Depends on:** SA-000, SA-008, SA-009
 - **Problem / question:** Can the frozen pipeline emit the complete prototype without per-card authorship?
-- **Next experiment:** From a clean checkout, generate claims, all available complete single-catalog baselines, 100 composite cards, three populated canonicalized alternative edges each, coverage, and the intervention-allocation log. Do not inspect a future held-out subset. Commit `output-freeze.json` with all hashes and producer versions and add the fixed `Cycle 1 output freeze` workflow.
+- **Next experiment:** From a clean checkout, generate claims, all available complete single-catalog baselines, 100 composite cards, three populated canonicalized alternative edges each, coverage, and the intervention-allocation log. Do not inspect a future held-out subset. Commit `output-freeze.json` with all hashes and producer versions and add the fixed `Cycle 1 output freeze` workflow. Do not bind the freeze before `SA-000` has secured an eligible evaluator: an absent evaluator makes Keep and Pivot ineligible and fires Rule 0, so freezing first converts a cheap early block into a terminal Kill after the whole acquisition and synthesis cost has been paid.
 - **Expected information gain:** Produces the exact untouched objects whose value and maintenance cost will be measured.
 - **Validation / acceptance:** Exactly 100 canonical JSON and Markdown composites; required baselines and native coordinates; 300 valid alternative edges, each card having three pairwise-distinct, non-self targets from distinct canonical identity groups; byte-stable regeneration; no unsupported claims; all manual interventions allocated/reconciled. If 300 valid edges cannot be produced, apply the early substantive Kill. Otherwise the first commit whose named GitHub-hosted workflow succeeds becomes binding.
 - **Artifacts / docs:** `02-claims/`, `03-cards/`, `manifests/output-freeze.json`
@@ -314,7 +342,7 @@ This is the only path that may close Cycle 1 without `SA-015`.
 
 - **Status:** Blocked (SA-010)
 - **Priority:** Critical
-- **Execution:** CLOUD plus human comparator-completeness check
+- **Execution:** CLOUD + HUMAN (comparator-completeness check)
 - **Category:** Audit preparation
 - **Depends on:** SA-000, SA-010
 - **Problem / question:** Can the audit subjects and view ordering be selected after outputs are immutable, with no missing/straw comparator advantage?
@@ -322,7 +350,7 @@ This is the only path that may close Cycle 1 without `SA-015`.
 - **Expected information gain:** Removes subject targeting and comparator omission as explanations for a win.
 - **Validation / acceptance:** Workflow run and pulse records are preserved; sample derivation is independently reproducible; no smoke/calibration entity appears; B1 is 20/20; bundle hashes and sealed ordering key are committed; evaluator declaration is ready. A rerun/replacement or failure fires Rule 0.
 - **Artifacts / docs:** `04-audit/bundle/`, `04-audit/sample-manifest.json`, `04-audit/sealed-ordering.json`
-- **Estimated scope:** Small
+- **Estimated scope:** Medium
 
 ### SA-012 — Complete the independent human audit
 
@@ -342,7 +370,7 @@ This is the only path that may close Cycle 1 without `SA-015`.
 
 - **Status:** Blocked (SA-010)
 - **Priority:** Critical
-- **Execution:** CLOUD plus bounded human verification
+- **Execution:** CLOUD + HUMAN (bounded E1/E2 verification)
 - **Category:** Metrics audit
 - **Depends on:** SA-010
 - **Problem / question:** Are E1/E2 totals real, version-relevant, and lineage-independent rather than uncorrected classifier output?
@@ -356,7 +384,7 @@ This is the only path that may close Cycle 1 without `SA-015`.
 
 - **Status:** Blocked (SA-012)
 - **Priority:** High
-- **Execution:** CLOUD + HUMAN GATED when triggered
+- **Execution:** CLOUD + HUMAN (paired category audit, only when the probe triggers)
 - **Category:** Conditional pivot validation
 - **Depends on:** SA-012, SA-013
 - **Problem / question:** If broad Keep fails without an early Kill, is value concentrated enough in pre-evidence categories to justify only a narrow confirmatory cycle?
