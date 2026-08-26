@@ -1,251 +1,385 @@
 # Roadmap — Cycle 1 evidence-value experiment
 
-## Decision this cycle must enable
+## Falsifiable outcome
 
-Decide whether this proposition is worth a second cycle:
+Cycle 1 tests one narrow proposition:
 
-> For someone choosing among public agent skills, a provenance-aware card that combines independent evidence, exposes disagreement, and names credible substitutes is materially more decision-useful than any single existing catalog for a majority of popular skills, and can be maintained with at most five minutes of human cleanup per card.
+> For the top 100 canonical, non-duplicate skill entities derived from one frozen skills.sh all-time leaderboard snapshot, an untouched provenance-aware composite card is more useful for an install/avoid/compare decision than every complete individual catalog view available for that subject on at least 15 of 20 post-freeze held-out cards; at the same time, independent evidence and alternatives meet the thresholds below, median human correction is at most five minutes, and the correction-time tail is bounded.
 
-This is a product-risk experiment. It does not attempt to prove demand, business model, or production-scale crawling. The cycle ends with **Keep**, **Pivot**, or **Kill** based on committed artifacts and thresholds below.
+“Top 100” in this repository never means all popular public skills. It means the first 100 accepted canonical entities in the exact frozen skills.sh ranking defined below. Fifteen paired wins in a 20-card audit is deliberately stronger than an observed bare majority: its two-sided 95% Wilson lower bound is above 50%.
 
-## Cycle 1 deliverable
+The Cycle 1 result is a **data prototype and a decision**, not a site:
 
-The complete prototype consists of:
+1. one frozen ranked input and bounded alternative-candidate universe;
+2. 100 canonical entities with identity and source-attempt ledgers;
+3. immutable observation, claim, card, baseline, and audit layers;
+4. exactly three alternative slots per card;
+5. one independently evaluated, post-freeze 20-card paired audit;
+6. verified metrics and exactly one Keep/Pivot/Kill outcome.
 
-1. a timestamped cohort derived from the all-time skills.sh leaderboard and resolved to 100 canonical, non-duplicate skill entities;
-2. a provenance ledger and replayable extracted records from GitHub/upstream material, skills.sh adoption and partner audits, SkillProof, Tessl, and a bounded search for skill-specific external experience reports;
-3. 100 machine-produced evidence cards, each with up to three ranked alternatives and explicit missing/conflicting evidence;
-4. frozen single-catalog baseline views for the same subjects;
-5. a deterministic, held-out 20-card audit bundle, completed by a reviewer who did not tune the pipeline where possible;
-6. a metrics report and decision memo that applies the rule in this roadmap without changing it after results are known.
+The cycle excludes a public UI, production database, continuous crawler, submission flow, accounts, personalized recommendations, and original large-scale skill evals. It also does not test demand or business model.
 
-The cycle excludes a public site, production database, continuous crawler, personalized recommendations, author submission flow, and original large-scale skill evals.
+## Fixed experiment contract
 
-## Known source constraints to verify, not assume away
+### Ranked input, cohort, and candidate universe
 
-- The [skills.sh API](https://skills.sh/docs/api) exposes the all-time leaderboard, stable IDs, content hashes/file trees, duplicate flags, and partner security audits. Its current documented authentication path is Vercel OIDC; the experiment must prove a permitted, reproducible acquisition path before depending on it.
-- [SkillProof](https://skillproof.dev/blog/skills-that-beat-baseline) publishes baseline-vs-skill testing and says it has tested more than two thousand skills, but bulk access, stable identity mapping, and reproducible machine-readable access are not yet established for this project.
-- [Tessl](https://tessl.io/blog/skills-are-software-and-they-need-a-lifecycle-introducing-skills-on-tessl/) distinguishes structural review evals from with/without-skill task evals. A review score is not empirical efficacy evidence, and broad public task-eval coverage must not be assumed.
-- skills.sh may aggregate security verdicts from other providers. Independence is assigned to the originating provider/run, not to the page or API that republishes it.
+The primary input is the authenticated official request:
 
-## Frozen definitions and metrics
+```text
+GET https://skills.sh/api/v1/skills?view=all-time&page=0&per_page=500
+```
 
-These definitions are part of the experiment contract. `SA-002` may clarify field-level mechanics after the first vertical slice, but it must not weaken the semantic bar or decision thresholds.
+The committed capture includes the unmodified response bytes, relevant response headers, retrieval time, request parameters, and SHA-256. The only fallback is an operator-provided capture of **that same authenticated endpoint and query**, with the same metadata and schema checks. A rendered page, search-engine result, another catalog, or a hand-built list is not an equivalent fallback. If neither path works, Rule 0 fires.
 
-### Unit of analysis
+All 500 ranked rows form the bounded Cycle 1 alternative-candidate universe. The cohort is produced by walking those rows in rank order until 100 canonical non-duplicate entities are accepted. Every encountered row and every group/skip decision remains in the manifest.
 
-The acquisition snapshot starts from all-time leaderboard order and advances until it contains 100 canonical, non-duplicate entities. The frozen manifest preserves every encountered leaderboard row, rank, exclusion/grouping decision, alias, source revision, and retrieval time so that “top 100” cannot be silently reinterpreted later.
+Durable identity uses source type, source owner/repository or well-known provider, and actual skill path/slug. Content hash and repository commit identify an **observation version**, not the enduring entity. Display names never join records. Official duplicate flags, identical content, or a verified source move may support grouping; uncertain similarity alone may not. Unresolved identity uncertainty is reported and sensitivity-tested, not silently merged.
 
-A canonical identity is based on the actual skill source, path/slug, and immutable revision or content hash—not display name alone. Forks or copies are grouped only with recorded evidence; uncertain matches remain separate and are labelled uncertain.
+### Mandatory comparator set and paired decision task
 
-### Independent source
+The prespecified catalog comparators are:
 
-Two items are independent only when they have different controlling source owners and do not reuse the same underlying claim, dataset, scan, or test run. Upstream `SKILL.md` and its README are one author-controlled source. An audit surfaced by skills.sh retains the audit provider as its origin. A mirrored or translated report is not a new source.
+- skills.sh;
+- SkillProof;
+- Tessl Registry.
 
-### Evidence classes
+skills.sh is mandatory for every audited subject because it defines the cohort. SkillProof and Tessl are mandatory comparators whenever a complete coverage check finds a page/record for that subject. `Not covered` is a valid source result; `coverage unresolved` or `covered but capture incomplete` is not.
 
-- **Author claim:** description, README, examples, or self-reported benchmark.
-- **Adoption signal:** installs, stars, forks, recency; never treated as efficacy.
-- **Structural review:** rubric or static quality analysis without task execution.
-- **Security evidence:** static/dynamic scan or documented incident, with provider and method.
-- **Empirical efficacy evidence:** an executed task or suite with an observable outcome and enough conditions to interpret it. It is **independent** only when the evaluator is not the skill author.
-- **Experience report:** a skill-specific report by an identifiable user/reviewer that describes observed use, failure, setup cost, or comparison; generic listicles and copied descriptions do not qualify.
+For each source, the baseline is an equivalent-format view containing every decision-relevant fact present in the captured native catalog record, with no cross-source synthesis. The native capture/immutable coordinates remain available for completeness review. A pipeline-produced baseline may not omit awkward fields, warnings, setup details, or negative results. Any incomplete required baseline in the held-out sample fires Rule 0 rather than giving the composite a default win.
 
-### Decision-useful synthesis
+The independent evaluator receives the subject identity and a fixed job-to-be-done, then views the untouched composite and all available complete single-catalog views in randomized, label-masked order. For each view the evaluator records:
 
-A reviewed card passes this metric only if it contains at least one correct fact or conclusion that changes an install/avoid/compare decision and that no one baseline catalog presents by itself. It must require cross-source combination, identity reconciliation, or explicit treatment of a material conflict/non-comparability. Merely placing independent facts next to each other is not enough.
+1. `try`, `avoid`, or `insufficient`;
+2. the first skill to try, if any;
+3. the most important reason/caveat;
+4. decision confidence from 1–5;
+5. which one view, if any, is uniquely most useful.
 
-The reviewer answers a fixed question: **“Would this additional information plausibly change which skill I try, whether I try one, or what caveat/setup I plan for?”** and records the concrete finding that caused the answer.
+The composite earns a paired win only when it is uniquely most useful against **all** available individual catalog views and contains no critical identity, provenance, or factual error. Ties and losses are not wins. Presentation masking reduces cueing but is not claimed to make visibly different content perfectly blind.
 
-### Alternative correctness
+### Evidence and independence
 
-Every card has exactly three candidate slots. A candidate is correct when it addresses substantially the same user job, is a plausible substitute before installation, and is not merely a fork/copy of the subject. On the 20-card audit, missing slots count as incorrect. `precision@3 = accepted candidate slots / 60`; the passing bar is at least 48/60 (80%). Recall is reported as unknown rather than implied.
+Every observation has both a source owner and a lineage ID for the underlying dataset, scan, test run, or report. Different host pages or owners do not establish independence when they republish the same lineage. Unknown ownership/lineage is treated as non-independent.
 
-### Cleanup time
+Evidence classes stay separate:
 
-Cleanup starts when the reviewer opens the generated card and ends when it meets the audit rubric or is marked unusable. Source browsing needed to verify or correct the card is included. The median across all 20 audited cards must be at most five minutes; unusable cards retain their full time and fail usefulness.
+- `author_claim` — author-controlled SKILL.md, README, examples, or benchmark;
+- `adoption` — installs, stars, forks, or recency; never efficacy;
+- `structural_review` — rubric/static quality analysis without task execution;
+- `security` — scan or incident with provider, method, and version relevance;
+- `empirical_efficacy` — executed task/suite with observable outcome and material model/harness conditions;
+- `experience_report` — skill-specific observed use, failure, setup cost, or comparison from an identifiable non-author; copied descriptions and generic listicles do not qualify.
 
-### Reported metrics
+Evidence is version-relevant only when it targets the captured revision or the claim states why it remains applicable. A card satisfies multi-origin decision evidence only when it has at least two independent lineages controlled by different owners and at least one is a version-relevant, non-author `structural_review`, `security`, `empirical_efficacy`, or `experience_report`. Author description plus adoption alone does not pass.
 
-| ID | Metric | Denominator |
+Differences are labelled contradictions only when they address the same proposition under materially comparable versions, models, harnesses, and tasks. Otherwise the card preserves them as context, stale-version evidence, or non-comparability.
+
+### Immutable artifact layers
+
+Cycle 1 uses these exact layers:
+
+```text
+experiments/cycle-1/00-inputs/
+experiments/cycle-1/01-observations/
+experiments/cycle-1/02-claims/
+experiments/cycle-1/03-cards/
+experiments/cycle-1/04-audit/
+experiments/cycle-1/05-decision/
+experiments/cycle-1/manifests/
+```
+
+Each producer writes a manifest containing input hashes, output hashes, producer command/version, timestamp, and manual interventions. A source capture is labelled `stored`, `externally_immutable`, or `metadata_only`; only the first two are called replayable. Observations are source-faithful extractions, claims normalize propositions and conditions, and cards synthesize claims. A derived layer consumes only frozen hashes from the preceding layer.
+
+The binding output freeze is the first commit on `main` containing `experiments/cycle-1/manifests/output-freeze.json` whose GitHub Actions workflow named `Cycle 1 output freeze` succeeds. That workflow must run ARK validation plus clean-checkout regeneration and manifest reconciliation. Its GitHub-hosted run ID, URL, `head_sha`, and server-recorded `completed_at` are preserved in the audit manifest. Re-running/replacing that successful freeze or editing an eligible card/baseline afterward is a material protocol deviation and fires Rule 0.
+
+### Calibration, held-out sampling, and evaluator independence
+
+The smoke entity and ten calibration entities are excluded from every confirmatory audit. The calibration set is deterministically selected from the frozen cohort using `SHA-256(cohort_snapshot_sha256 || "skills-alternative-cycle-1-calibration-v1")`; its algorithm and exclusions are fixed before any adapter or synthesis tuning.
+
+Only the held-out **algorithm and rank-quartile strata** are precommitted. The actual 20 subjects remain unknowable until after the output-freeze commit. The seed is derived from:
+
+```text
+SHA-256(output_freeze_commit_sha || output_freeze_workflow_run_id || nist_beacon_output_value || "skills-alternative-cycle-1-audit-v1")
+```
+
+where `nist_beacon_output_value` is the first [NIST Randomness Beacon 2.0](https://csrc.nist.gov/projects/interoperable-randomness-beacons/beacon-20) pulse timestamped at least two minutes after the binding workflow run's GitHub-server-recorded `completed_at`. The algorithm shuffles eligible entities within canonical-rank quartiles and chooses five per quartile. The smoke/calibration exclusions and deterministic replacement rule are applied before selection. A replacement/rerun after seeing the pulse invalidates the experiment.
+
+The evaluator must be a human who did not create or tune the pipeline, schemas, rubrics, source mappings, cards, baselines, or thresholds, and who has not seen the card outputs before receiving the sealed bundle. The evaluator receives the task/rubric but not threshold values. If no such evaluator is available, Keep and Pivot are ineligible and Rule 0 fires.
+
+The audit has three ordered phases:
+
+1. score untouched randomized views and alternatives (candidate names first, generated rationales hidden);
+2. start the cleanup timer, reveal provenance, browse captured/native sources, and verify and diagnose every decision-relevant claim, alternative, and baseline-completeness issue;
+3. keep the same timer running while editing a separate copy; preserve the verification/diagnosis/edit subtotals, pauses with reasons, patch, and total duration.
+
+T1 includes every human action outside smoke/calibration tuning whose absence would change one or a bounded set of entity/card outputs: identity adjudication; source mapping/joining; source browsing and verification; issue diagnosis; extraction correction; taxonomy assignment/correction; lineage, conflict, or version-relevance classification; candidate replacement/copy checks; baseline completeness/repair; and card edits. Each pre-freeze action records elapsed seconds and all affected entity IDs; shared work is allocated equally across that fixed set before sampling. Generic pipeline development performed only on smoke/calibration data is reported separately and excluded. An audited card's T1 is its allocated pre-freeze time plus the complete post-scoring Phase 2+3 timer; verification, diagnosis, and editing subtotals are reported but the threshold applies to their sum. Only genuine inactivity pauses with timestamped reasons are excluded. An unusable card receives the 15-minute correction cap, not a fast zero. Unlogged, omitted, or reclassified entity-specific work fires Rule 0.
+
+### Metrics
+
+| ID | Metric | Denominator and exact pass value |
 | --- | --- | --- |
-| M1 | Cards with at least two correctly attributed independent source owners, including at least one non-author source | 100 canonical cards |
-| M2 | Cards with decision-useful synthesis not available in any one baseline catalog | 20 held-out cards |
-| M3 | Cards with independent empirical efficacy evidence | 100 canonical cards |
-| M4 | Correct alternatives (`precision@3`) | 60 held-out candidate slots |
-| M5 | Median manual cleanup time | 20 held-out cards |
-| M6 | Single-source redundancy: reviewer reaches the same decision and material rationale from one baseline catalog alone | 20 held-out cards |
-| M7 | Claim accuracy/provenance: sampled decision-relevant claims supported by the cited origin and conditions | all such claims in 20 held-out cards |
+| E1 | Verified multi-origin decision evidence | 100 cards; count only after all 100 positive/negative classifications are manually verified |
+| E2 | Verified independent empirical efficacy evidence | 100 cards; count only after all 100 positive/negative classifications are manually verified |
+| C1 | Untouched composite paired wins | 20 held-out cards; Keep requires at least 15 |
+| A1 | Correct alternative slots | 60 populated slots; Keep/Pivot eligibility requires at least 48 |
+| A2 | Cards with at least two correct alternatives | 20 cards; Keep/Pivot eligibility requires at least 16 |
+| T1 | Card-specific human correction time | 20 cards; median at most 5 minutes, at most 2 cards over 10 minutes; unusable = 15 minutes |
+| P1 | Cards whose every decision-relevant factual claim is supported by the cited origin/conditions | 20 cards; at least 19, with zero critical identity/provenance errors |
+| B1 | Audited subjects with complete required comparator capture | 20 cards; must be 20 or Rule 0 fires |
 
-For M1 and M3, the automated result is accepted only if the held-out audit finds no more than one false-positive card for that metric. Report raw counts, failures, and Wilson intervals for sampled proportions; thresholds use the observed counts specified here, not an extrapolated point estimate.
+Every prototype card must contain three populated, valid candidate edges before output freeze (300 total). Their `target_canonical_id` values must be pairwise distinct, differ from the subject ID, and belong to three distinct canonical identity groups; a copy/fork or another version of the subject cannot fill a slot. Inability to do so is a substantive alternatives-graph Kill, not an empty or duplicated slot. Any invalid emitted target is a critical A1/A2 failure. Recall is explicitly unknown. Alternative slot judgments are clustered by card; report both slot totals and card-level results rather than treating 60 slots as independent observations.
 
-## Decision rule
+Report raw counts, the initial and corrected identity error rates, publisher/repository/category concentration, one-entity-per-cluster sensitivity, and Wilson intervals for sampled proportions. Thresholds use the integer counts above.
 
-Apply the first matching rule in this order:
+### Decision precedence
 
-1. **Kill** if M1 is below 25/100, or M6 is at least 16/20, or M7 is below 95%. These mean useful independent evidence is too rare, one incumbent already supplies nearly all decision value, or the synthesis cannot be trusted.
-2. **Keep** only if all are true: M1 at least 60/100; M2 at least 12/20; M3 at least 30/100; M4 at least 48/60; M5 at most five minutes; M6 at most 5/20; and M7 at least 95%.
-3. **Pivot to curated category comparisons** if Keep fails but M1 is at least 25/100, M4 is at least 48/60, M7 is at least 95%, and the audited data contains at least two coherent job categories with at least five canonical skills each and at least half of the audited cards in those categories pass M2. The decision memo must name the categories from the frozen data, not invent them after selecting favorable examples.
+Apply the first matching rule:
+
+0. **Kill — experiment invalid, no product inference** if the exact cohort/candidate capture or mandatory comparator capture fails; the held-out subjects become knowable before output freeze; smoke/calibration leaks into an audit; evaluator independence fails; a required denominator is zero/undefined; manifests/hashes do not reconcile; a binding output/workflow is replaced or rerun; unlogged/reclassified entity-specific work is found; or a material protocol deviation can affect any threshold.
+1. **Kill — evidence/alternatives layer not viable** if the prototype cannot populate three canonicalized alternatives on every card, E1 is below 25/100, C1 is at most 4/20 (individual catalogs tie/beat the composite on at least 16/20), P1 is below 19/20, or any critical identity/provenance error exists.
+2. **Keep** only if E1 is at least 60/100, E2 at least 30/100, C1 at least 15/20, A1 at least 48/60, A2 at least 16/20, T1 passes both bounds, P1 is at least 19/20 with zero critical errors, and B1 is 20/20.
+3. **Run the precommitted category Pivot probe** only if neither prior rule fires, E1 is at least 25/100, A1/A2/T1/P1/B1 pass, and the pre-evidence taxonomy contains at least two primary categories with at least ten cohort entities, at least five still eligible after all exclusions, and verified E1 coverage of at least 60% each. Select the two eligible categories with the highest verified E1 rate (ties: larger category, then category ID), never by composite audit outcome. Use a new post-workflow NIST seed to select five previously unaudited/non-calibration entities per category. **Pivot** only if **each category independently** has at least 4/5 untouched composite wins, 4/5 verified E1 cards, 12/15 correct alternative slots, 4/5 cards with two correct alternatives, median correction at most five minutes with no card over ten, 5/5 provenance passes, and 5/5 complete comparators. Pivot means “fund a confirmatory narrow category-comparison cycle,” not “the category product is validated.”
 4. **Kill** otherwise.
 
-Failure to acquire a named optional source is a measured absence, not automatic failure. Failure to obtain and freeze a defensible 100-entity cohort makes the experiment invalid; `SA-001` must then choose and document either a permitted equivalent leaderboard snapshot (without changing thresholds) or an early Kill, rather than proceed with a hand-picked cohort.
+Decision thresholds and comparator rules may not change after `SA-003`. A discovered defect is recorded; if material, Rule 0 fires rather than repairing the result into a pass.
 
-## Execution order
+### Early-close procedure
 
-### SA-001 — Produce one real end-to-end evidence card and prove cohort access
+Any roadmap item that establishes Rule 0 or another early substantive Kill owns the close; it must not wait for its now-blocked successors or for `SA-015`. In the same change it:
+
+1. writes `05-decision/decision.md` and machine-readable available metrics as `Kill`, naming `experiment invalid` vs substantive evidence/alternatives failure and forbidding unsupported product inference;
+2. preserves the triggering evidence and strongest counter-interpretation;
+3. marks every other unstarted Cycle 1 item `Dropped` with the same decision artifact as reason—including ready/open siblings, not only downstream items—and honestly reconciles every partially executed item;
+4. runs `agentic-repo check` and satisfies the stop condition.
+
+This is the only path that may close Cycle 1 without `SA-015`.
+
+## Executable roadmap
+
+### SA-000 — Secure an independent human evaluator and sealed handoff
+
+- **Status:** Open
+- **Priority:** Critical
+- **Execution:** HUMAN GATED
+- **Category:** Evaluation governance
+- **Depends on:** None
+- **Problem / question:** Is an evaluator available who can remain independent of pipeline/rubric construction and unseen outputs until the sealed audit?
+- **Next experiment:** Identify one human evaluator, disclose the role and time commitment without showing thresholds or future outputs, record conflicts/relationship, and agree on custody of the phased bundle and ordering key. The evaluator may withdraw before seeing outputs without invalidating work; replacement must satisfy the same declaration before bundle delivery.
+- **Expected information gain:** Removes a predictable late-stage blocker and prevents developer self-review from being relabelled independent after the cards exist.
+- **Validation / acceptance:** A signed/acknowledged eligibility and confidentiality-of-thresholds declaration, contact-independent handoff procedure, withdrawal/replacement rule, and expected audit phases are stored without exposing any card output.
+- **Artifacts / docs:** `docs/evaluator-handoff.md`, `experiments/cycle-1/04-audit/evaluator-declaration-template.md`
+- **Estimated scope:** Small
+
+### SA-001 — Freeze the official ranked input and candidate universe
 
 - **Status:** Investigation first
 - **Priority:** Critical
-- **Category:** Vertical slice / acquisition
+- **Execution:** CLOUD RESEARCH / GATED on permitted skills.sh authentication or operator capture
+- **Category:** Acquisition gate
 - **Depends on:** None
-- **Problem / question:** Can the project obtain one real popular skill plus independent evidence through permitted, reproducible paths, and can it freeze the official all-time ranking needed for the cohort?
-- **Known evidence:** skills.sh documents an authenticated API; SkillProof and Tessl expose public reports but bulk access and stable joins are unproven.
-- **Hypotheses:** One card can be assembled without a crawler or production schema; skills.sh OIDC or a permitted operator-provided export can freeze the ranking; missing optional sources can be represented honestly.
-- **Next experiment:** Use a fixed, non-hand-picked subject from the first accessible all-time leaderboard page (the highest-ranked entity). Capture its upstream revision, skills.sh record/audits, attempted SkillProof/Tessl mappings, and one bounded external-review search. Produce a human-readable card plus a source ledger. In the same slice, freeze enough signed/hashed leaderboard response to prove how a 100-entity cohort will be obtained. Do not bypass authentication or access controls.
-- **Expected information gain:** Establishes the actual join keys, provenance fields, access blockers, and whether the narrow path can emit a decision-useful object before formalising a schema.
-- **Proposed direction after evidence:** Continue to `SA-002` if a defensible cohort path exists; otherwise record the exact blocker and choose a permitted equivalent snapshot or early Kill under the decision rule.
-- **Compatibility / safety:** No credentials or complete third-party pages in git. Respect source terms, robots directives, rate limits, and licenses.
-- **Validation / acceptance:** `experiments/cycle-1/smoke/` contains one rendered card, its extracted evidence records, direct source URLs, retrieval timestamps, hashes/revisions, every failed acquisition attempt, and a reproducible cohort-access note. A reviewer can trace every card claim to an origin. The slice states which evidence is missing and does not assign composite quality.
-- **Artifacts / docs:** `experiments/cycle-1/smoke/`, `docs/source-access.md`
+- **Problem / question:** Can Cycle 1 obtain the exact official ranking it claims to study without a hand-picked fallback?
+- **Next experiment:** Execute the fixed skills.sh request above through Vercel OIDC. If this environment cannot, attempt one bounded operator handoff for a capture of the same request. Do not inspect subject-specific evidence first.
+- **Expected information gain:** Establishes whether the stated population and bounded alternative universe exist as a defensible input.
+- **Validation / acceptance:** `00-inputs/skills-sh/` contains the raw 500-row response, request/response metadata, retrieval time, SHA-256, schema validation, rank monotonicity/uniqueness checks, and acquisition-attempt log. Failure records Rule 0 and stops the cycle.
+- **Artifacts / docs:** `experiments/cycle-1/00-inputs/skills-sh/`, `docs/source-access.md`
 - **Estimated scope:** Small
 
-### SA-002 — Freeze the experiment protocol, schema, and audit rubric
+### SA-002 — Emit one real card and a source-feasibility matrix
 
 - **Status:** Blocked (SA-001)
 - **Priority:** Critical
-- **Category:** Experiment contract
+- **Execution:** CLOUD RESEARCH
+- **Category:** Vertical slice
 - **Depends on:** SA-001
-- **Problem / question:** Convert lessons from the real card into a machine-checkable contract without moving the product thresholds.
-- **Known evidence:** This roadmap fixes semantic definitions and the decision rule; the vertical slice reveals field shapes and real source limitations.
-- **Hypotheses:** A small claim-level model can preserve origin, aggregator, subject revision, method, conditions, direction, and comparability without a universal quality score.
-- **Next experiment:** Define the minimal JSON/JSONL schemas, source-status vocabulary, card template, single-source baseline format, alternative rubric, decision-usefulness rubric, timing procedure, error taxonomy, and deterministic audit sampling algorithm. Pre-commit the audit seed and exact replacement rule before cohort processing.
-- **Expected information gain:** Shows whether provenance and disagreement can remain inspectable rather than disappearing into prose.
-- **Proposed direction after evidence:** Use the contract for all remaining artifacts; schema changes after card generation require a recorded protocol deviation and invalidate affected metrics until regenerated.
-- **Compatibility / safety:** Make conditions explicit; do not infer evaluator independence from site branding alone.
-- **Validation / acceptance:** Schemas validate the smoke card; the protocol contains executable metric formulas, immutable threshold values, a 20-card sampling rule (five per rank quartile), blinded comparison procedure, cleanup timer instructions, and a deviation log initially empty. Fixtures cover missing evidence, republished audits, version mismatch, true conflict, and non-comparable results.
-- **Artifacts / docs:** `docs/experiment-protocol.md`, `schema/`, `fixtures/`, `experiments/cycle-1/protocol-deviations.md`
-- **Estimated scope:** Medium
+- **Problem / question:** Can one highest-ranked row travel from upstream source through real external evidence into an inspectable card, and which sources are batch-feasible?
+- **Next experiment:** Use the highest-ranked input row as the fixed smoke subject. Attempt GitHub/upstream, skills.sh details/audits, SkillProof, Tessl, and one bounded external-experience search. Produce the smallest source-faithful observations, claims, baseline views, composite card, and alternatives that can carry the full path.
+- **Expected information gain:** Reveals join keys, authentication, allowed acquisition/storage, rate/search budgets, version relevance, lineage, and genuine missing data before schema work.
+- **Validation / acceptance:** The smoke card traces every sentence to an origin; failures are typed. A matrix records for every source: permitted path, auth, stable key, one positive/negative lookup where possible, expected coverage, rate/search limit, storage rights, replay status, and exact batch blocker. The smoke subject is permanently audit-ineligible.
+- **Artifacts / docs:** `experiments/cycle-1/smoke/`, `docs/source-access.md`
+- **Estimated scope:** Small
 
-### SA-003 — Freeze and audit the 100-entity cohort
+### SA-003 — Freeze protocol, comparators, rubrics, search, taxonomy, and decision rule
 
 - **Status:** Blocked (SA-002)
 - **Priority:** Critical
-- **Category:** Cohort / identity
-- **Depends on:** SA-002
-- **Problem / question:** Can leaderboard rows be resolved to stable skill identities without display-name joins, hidden exclusions, or duplicate inflation?
-- **Known evidence:** skills.sh exposes stable IDs, content hashes, source type, and an `isDuplicate` signal; that signal alone may not cover forks, moved skills, or multi-skill repositories.
-- **Hypotheses:** Source + actual skill path/slug + revision/hash is sufficient for most identities; uncertain cases can remain explicit without corrupting the cohort.
-- **Next experiment:** Traverse frozen all-time rank order until 100 canonical non-duplicate entities are accepted. Preserve every encountered row and reason for grouping/exclusion. Manually audit all uncertain identities and a deterministic 10-entity sample of accepted identities.
-- **Expected information gain:** Measures identity ambiguity and prevents evidence or alternatives from being joined to the wrong skill.
-- **Proposed direction after evidence:** Use the immutable manifest as the only population for Cycle 1.
-- **Compatibility / safety:** Do not exclude low-quality, unavailable, suspicious, or inconvenient skills; only evidenced duplicates/copies are skipped.
-- **Validation / acceptance:** Manifest has exactly 100 accepted entity IDs, ranks, aliases, immutable source coordinates, hashes/revisions, and timestamps; every skipped row has an evidence-backed reason; all audited joins are correct; a rerun from the frozen input yields byte-identical membership.
-- **Artifacts / docs:** `experiments/cycle-1/cohort/leaderboard-snapshot.*`, `canonical-skills.jsonl`, `identity-audit.md`
+- **Execution:** CLOUD
+- **Category:** Experiment protocol
+- **Depends on:** SA-001, SA-002
+- **Problem / question:** Can the experiment be specified so that later missing sources, categories, and outputs cannot change what counts as success?
+- **Next experiment:** Turn the fixed contract above and source-feasibility results into a versioned protocol. Name exact external-search provider/API or disable that source for the entire cohort; freeze locale, aliases, query templates, result depth, exclusion rules, and “first N qualifying results regardless of sentiment.” Freeze a finite primary job-to-be-done taxonomy and assignment rubric before external evidence is processed. Freeze comparator completeness, evaluator eligibility, masking, correction timing, NIST sampling, and Rule 0.
+- **Expected information gain:** Removes cohort, comparator, search, category, and audit degrees of freedom before the final data exists.
+- **Validation / acceptance:** `experiment-protocol.md` contains exact integer formulas, no placeholder source or fallback, a deviation log, evaluator declaration, paired task, calibration/held-out/pivot algorithms, and a worked synthetic decision example. Thresholds match this roadmap byte-for-byte.
+- **Artifacts / docs:** `docs/experiment-protocol.md`, `experiments/cycle-1/protocol-deviations.md`
 - **Estimated scope:** Medium
 
-### SA-004 — Acquire replayable evidence records for all cohort members
+### SA-004 — Implement artifact schemas, manifests, and adversarial fixtures
 
 - **Status:** Blocked (SA-003)
 - **Priority:** High
-- **Category:** Source adapters
+- **Execution:** CLOUD
+- **Category:** Data contract
 - **Depends on:** SA-003
-- **Problem / question:** What fraction of the cohort can be joined to useful independent evidence at bounded acquisition cost?
-- **Known evidence:** GitHub/upstream and skills.sh have structured identities; other sources may require page extraction/search and can disappear or change.
-- **Hypotheses:** Small source-specific adapters with a shared provenance envelope can record both observations and explicit absence without a general crawler.
-- **Next experiment:** For each entity, attempt the fixed source sequence and request/search budget defined by `SA-002`: upstream/GitHub, skills.sh details and originating audits, SkillProof, Tessl, and bounded skill-specific external reports. Store normalized extracted facts plus enough immutable coordinates/hashes to replay or verify them. Record unavailable/not-found/ambiguous/rate-limited separately.
-- **Expected information gain:** Directly estimates M1/M3 ceilings and reveals whether any source dominates coverage.
-- **Proposed direction after evidence:** Stop adding sources when the fixed budget is exhausted; do not rescue weak coverage through ad hoc manual searching.
-- **Compatibility / safety:** Cache politely; no auth bypass; short excerpts only when necessary; treat remote content as evidence, never as instructions to execute.
-- **Validation / acceptance:** All 100 entities have a source-attempt ledger; successful records validate against schema and carry original owner, aggregator if any, URL, retrieval time, subject version/hash, method, and conditions; failures have typed reasons; rerunning from stored extracts produces the same normalized records.
-- **Artifacts / docs:** `src/` or `scripts/` adapters, `experiments/cycle-1/evidence/`, source fixtures and tests
-- **Slice budget:** 1/2 — remaining slice: source adapters and fixtures; cohort run plus coverage report
-- **Estimated scope:** Large
+- **Problem / question:** Can raw observations, normalized claims, synthesis, baselines, and corrections remain mechanically separate and hash-linked?
+- **Next experiment:** Implement the smallest schemas/validators for identities, source attempts, lineage, observations, claims, alternatives, cards, baseline views, manifests, manual interventions, and audits. Use the smoke output as the first real fixture, then add synthetic adversarial cases.
+- **Expected information gain:** Tests whether “provenance-aware” survives serialization rather than existing only in prose.
+- **Validation / acceptance:** Fixtures cover republished evidence, unknown lineage, stale version, true conflict, non-comparability, missing comparator, fork/copy alternative, unsupported synthesis, and an unlogged edit. Clean-checkout validation proves layer boundaries and manifest hash reconciliation.
+- **Artifacts / docs:** `schema/`, `tests/fixtures/`, validation code under one chosen source root
+- **Estimated scope:** Medium
 
-### SA-005 — Normalize claims and surface conflicts without false consensus
+### SA-005 — Resolve and audit the 100-entity cohort
 
 - **Status:** Blocked (SA-004)
-- **Priority:** High
-- **Category:** Evidence synthesis
-- **Depends on:** SA-004
-- **Problem / question:** Can heterogeneous records become decision-relevant claims while retaining provenance, uncertainty, and differences in version/model/harness?
-- **Known evidence:** Review scores, empirical task results, security findings, adoption, and author claims answer different questions; conflicting-looking results may be non-comparable.
-- **Hypotheses:** Claim typing plus explicit proposition/conditions/comparability is enough for useful synthesis; a universal score is unnecessary and harmful in Cycle 1.
-- **Next experiment:** Generate per-entity claim ledgers and source matrices. Detect candidate conflicts, then classify them as comparable contradiction, context-dependent difference, stale-version difference, or unknown. Manually calibrate rules on the smoke card and deterministic fixtures only—not the held-out sample.
-- **Expected information gain:** Tests the central product value: reconciliation rather than another directory page.
-- **Proposed direction after evidence:** Expose claims and disagreements directly in cards; do not average incompatible values.
-- **Compatibility / safety:** Generated conclusions must cite all contributing origins and use bounded language matching the evidence.
-- **Validation / acceptance:** Every synthesized claim has supporting record IDs; every conflict label identifies the proposition and compared conditions; fixtures prove that reposted evidence counts once and non-comparable task results are not marked as contradictions; unsupported synthesis fails generation.
-- **Artifacts / docs:** synthesis code, claim ledgers, source matrices, conflict fixtures/tests
+- **Priority:** Critical
+- **Execution:** CLOUD plus bounded human identity audit
+- **Category:** Identity / cohort
+- **Depends on:** SA-001, SA-004
+- **Problem / question:** Can ranked rows be joined to stable skill entities without duplicate inflation or evidence crossing identities?
+- **Next experiment:** Freeze the initial canonicalization output before review. Canonicalize all 500 candidate-universe rows, then walk them to 100 accepted cohort entities; preserve all rejected/grouped rows, assign the cohort's primary taxonomy category using upstream author material only, and select the ten calibration entities. Audit every uncertain cohort identity plus a deterministic 20-entity cohort sample and 30-row candidate-universe sample; preserve initial errors and corrections.
+- **Expected information gain:** Measures false joins/splits and category/publisher concentration before source evidence can influence membership.
+- **Validation / acceptance:** Exactly 500 ranked rows resolve to canonical candidate identities/groups and exactly 100 cohort entities are accepted; every decision has evidence. More than two errors in the 20-entity cohort audit or more than three in the 30-row universe audit requires a full rerun and new pre-evidence freeze; more than five unresolved cohort membership ambiguities fires Rule 0. Report initial/corrected error rates and merge/split sensitivity. Smoke/calibration exclusions are committed.
+- **Artifacts / docs:** `00-inputs/cohort/`, `manifests/cohort.json`, `00-inputs/identity-audit.md`
 - **Estimated scope:** Medium
 
-### SA-006 — Generate three credible alternative candidates per skill
-
-- **Status:** Blocked (SA-003)
-- **Priority:** High
-- **Category:** Alternatives graph
-- **Depends on:** SA-003
-- **Problem / question:** Can cheap catalog/content signals recover plausible substitutes rather than merely similar names, sibling skills, or copies?
-- **Known evidence:** skills.sh provides semantic search but its ranking optimizes discovery, not substitutability; the cohort may contain multi-purpose and category-unique skills.
-- **Hypotheses:** A job-to-be-done representation plus copy/fork exclusion and simple candidate fusion can reach 80% precision@3 without building a full ontology.
-- **Next experiment:** On the smoke card and protocol fixtures, compare at least two cheap candidate methods (catalog search and content/job similarity). Freeze one method or deterministic fusion before generating candidates for the cohort. Always emit three slots; use explicit missing slots when no defensible candidate exists.
-- **Expected information gain:** Determines whether the “AlternativeTo” graph is achievable independently of evidence coverage.
-- **Proposed direction after evidence:** Generate exactly three ranked candidates and a short evidence-backed substitution rationale for each.
-- **Compatibility / safety:** Exclude canonical copies/forks and do not treat complementary skills as substitutes merely because keywords overlap.
-- **Validation / acceptance:** All 100 cards have three candidate slots; each populated edge records method signals and rationale; generation is deterministic from frozen inputs; smoke/fixture judgments are not included in the held-out M4 score.
-- **Artifacts / docs:** alternative-generation code, `experiments/cycle-1/alternatives.jsonl`, tests
-- **Estimated scope:** Medium
-
-### SA-007 — Render 100 candidate cards and single-source baselines
+### SA-006 — Build source adapters on the excluded calibration set
 
 - **Status:** Blocked (SA-005)
 - **Priority:** High
-- **Category:** Data prototype
-- **Depends on:** SA-005, SA-006
-- **Problem / question:** Can the normalized evidence and alternative graph produce inspectable cards that help a choice without hand-authored prose?
-- **Known evidence:** The experiment needs comparable output, not a UI. Missing and contradictory evidence are themselves useful only if visible.
-- **Hypotheses:** Markdown plus canonical JSON is sufficient to test decision value and cleanup cost.
-- **Next experiment:** Render all cohort cards and separate baseline views for each individual catalog. Include identity, intended job, prerequisites/compatibility, adoption (labelled), evidence by class, conflicts/non-comparability, freshness, three alternatives, and explicit unknowns. Generate a machine-readable coverage report without interpreting the final decision.
-- **Expected information gain:** Produces the actual prototype and reveals whether synthesis remains useful at card scale.
-- **Proposed direction after evidence:** Freeze generated outputs before drawing the audit sample.
-- **Compatibility / safety:** No composite “quality” score; no unsupported recommendation; every decision-relevant sentence links to claim IDs/origins.
-- **Validation / acceptance:** Exactly 100 canonical JSON cards and 100 readable Markdown cards validate and render; baseline views exist for every source that covers the entity; generation from frozen inputs is byte-stable apart from declared build metadata; coverage totals reconcile with source ledgers.
-- **Artifacts / docs:** `experiments/cycle-1/cards/`, `baselines/`, `coverage.json`, renderer/tests
+- **Execution:** CLOUD RESEARCH
+- **Category:** Source adapters
+- **Depends on:** SA-004, SA-005
+- **Problem / question:** Do the precommitted access/search rules produce source-faithful observations across ordinary cases, not just the rank-1 smoke subject?
+- **Next experiment:** Run every enabled adapter only on the ten calibration entities. Implement typed `covered`, `not_covered`, `ambiguous`, `unavailable`, and `rate_limited` outcomes; preserve original owner and lineage separately from aggregator.
+- **Expected information gain:** Establishes batch feasibility and false-join/error shapes without touching audit-eligible content for tuning.
+- **Validation / acceptance:** Calibration observations validate; every enabled source has positive/negative fixtures where reality permits; exact request/search budget and caching behavior are enforced; no remote content is executed as instructions.
+- **Artifacts / docs:** adapter code/tests, `01-observations/calibration/`
 - **Estimated scope:** Medium
 
-### SA-008 — Run the held-out 20-card audit
+### SA-007 — Run one frozen batch acquisition
+
+- **Status:** Blocked (SA-006)
+- **Priority:** High
+- **Execution:** CLOUD
+- **Category:** Evidence acquisition
+- **Depends on:** SA-006
+- **Problem / question:** What evidence actually exists at cohort scale under the fixed budget, and is the bounded candidate universe sufficient for alternatives?
+- **Next experiment:** Run adapters once for all 100 cohort entities and acquire the minimal source/job/compatibility content needed for every canonicalized row in the 500-row candidate universe; capture revision/hash and copy/fork signals. No ad hoc rescue search is allowed.
+- **Expected information gain:** Reveals the real E1/E2 ceilings, source dominance, missingness, and candidate-universe quality.
+- **Validation / acceptance:** All entities and candidate rows have source-attempt ledgers; stored observations are hash-linked and typed; coverage totals reconcile; all card-specific manual work is timed/logged; a clean-checkout replay from stored inputs yields identical observations.
+- **Artifacts / docs:** `01-observations/`, acquisition manifest and coverage report
+- **Estimated scope:** Medium
+
+### SA-008 — Freeze claim synthesis and baseline/card rendering on calibration only
 
 - **Status:** Blocked (SA-007)
-- **Priority:** Critical
-- **Category:** Evaluation
+- **Priority:** High
+- **Execution:** CLOUD
+- **Category:** Evidence synthesis
 - **Depends on:** SA-007
-- **Problem / question:** Are cards accurate, uniquely decision-useful, alternatives credible, and cleanup cheap when judged outside pipeline calibration?
-- **Known evidence:** Developer self-review would favor the synthesis; card/baseline labels and ordering can bias a reviewer.
-- **Hypotheses:** Deterministic sampling, blinded/randomized presentation, and a fixed rubric can yield a directional but auditable prototype result.
-- **Next experiment:** After outputs are frozen, derive five cards from each rank quartile using the pre-committed seed and replacement rule. Build a bundle that randomizes and hides whether each view is the synthesized card or a single-source baseline. Prefer a reviewer who did not tune the pipeline. If only the maintainer is available, preserve blinding and disclose the limitation. Time cleanup separately, verify all decision-relevant claims, judge all 60 alternative slots, and record the concrete unique insight or failure for M2/M6.
-- **Expected information gain:** Supplies the evidence needed for every subjective decision threshold while exposing pipeline false positives.
-- **Proposed direction after evidence:** Lock the completed audit before calculating the decision.
-- **Compatibility / safety:** Do not replace sampled hard cases except under the pre-committed rule; preserve all rejected claims and alternatives.
-- **Validation / acceptance:** Audit contains exactly 20 distinct cohort cards, 60 alternative judgments, per-card M2/M6 decisions with rationale, claim-level provenance checks, M1/M3 false-positive checks, cleanup durations, reviewer identity/relationship disclosure, blinded ordering key revealed only after completion, and no unresolved rubric fields.
-- **Artifacts / docs:** `experiments/cycle-1/audit/`
+- **Problem / question:** Can heterogeneous observations become bounded claims and fair single-source/composite views without false consensus or straw comparators?
+- **Next experiment:** Tune claim typing, comparability, conflict classification, equivalent-format baseline extraction, and composite rendering only on smoke/calibration entities and adversarial fixtures. Baselines must include every decision-relevant native field.
+- **Expected information gain:** Tests the central synthesis layer before it sees any confirmatory outcome.
+- **Validation / acceptance:** Every generated sentence cites claim/observation IDs; unsupported text fails generation; republished evidence counts once; baseline completeness passes against native calibration captures; no composite quality score is introduced.
+- **Artifacts / docs:** synthesis/renderer code/tests, `02-claims/calibration/`, `03-cards/calibration/`
 - **Estimated scope:** Medium
 
-### SA-009 — Apply the pre-committed rule and close Cycle 1
+### SA-009 — Freeze the alternatives method on calibration only
+
+- **Status:** Blocked (SA-007)
+- **Priority:** High
+- **Execution:** CLOUD plus bounded calibration judgments
+- **Category:** Alternatives graph
+- **Depends on:** SA-005, SA-007
+- **Problem / question:** Can a bounded, frozen universe yield substitutes for the same job rather than similar names, complements, siblings, or copies?
+- **Next experiment:** Compare at least two cheap methods on calibration entities using only frozen candidate data. Freeze one deterministic method/fusion and a job-to-be-done rationale contract. Generated rationales are not shown during initial alternative judgment.
+- **Expected information gain:** Determines whether the AlternativeTo graph can be tested without an ontology or changing live search results.
+- **Validation / acceptance:** Method emits exactly three populated candidates for every calibration card. Their target canonical IDs are pairwise distinct, not the subject, and from distinct canonical identity groups; every edge is versioned and copy/fork checked. Failure to populate three valid targets is recorded as an alternatives-viability signal, not hidden by a missing or duplicated placeholder. Calibration labels and method choice are frozen and excluded from A1/A2.
+- **Artifacts / docs:** alternatives code/tests, `03-cards/calibration/alternatives.jsonl`
+- **Estimated scope:** Medium
+
+### SA-010 — Generate all untouched outputs and bind the freeze
 
 - **Status:** Blocked (SA-008)
 - **Priority:** Critical
+- **Execution:** CLOUD
+- **Category:** Data prototype
+- **Depends on:** SA-008, SA-009
+- **Problem / question:** Can the frozen pipeline emit the complete prototype without per-card authorship?
+- **Next experiment:** From a clean checkout, generate claims, all available complete single-catalog baselines, 100 composite cards, three populated canonicalized alternative edges each, coverage, and the intervention-allocation log. Do not inspect a future held-out subset. Commit `output-freeze.json` with all hashes and producer versions and add the fixed `Cycle 1 output freeze` workflow.
+- **Expected information gain:** Produces the exact untouched objects whose value and maintenance cost will be measured.
+- **Validation / acceptance:** Exactly 100 canonical JSON and Markdown composites; required baselines and native coordinates; 300 valid alternative edges, each card having three pairwise-distinct, non-self targets from distinct canonical identity groups; byte-stable regeneration; no unsupported claims; all manual interventions allocated/reconciled. If 300 valid edges cannot be produced, apply the early substantive Kill. Otherwise the first commit whose named GitHub-hosted workflow succeeds becomes binding.
+- **Artifacts / docs:** `02-claims/`, `03-cards/`, `manifests/output-freeze.json`
+- **Estimated scope:** Medium
+
+### SA-011 — Derive and seal the post-freeze audit bundle
+
+- **Status:** Blocked (SA-010)
+- **Priority:** Critical
+- **Execution:** CLOUD plus human comparator-completeness check
+- **Category:** Audit preparation
+- **Depends on:** SA-000, SA-010
+- **Problem / question:** Can the audit subjects and view ordering be selected after outputs are immutable, with no missing/straw comparator advantage?
+- **Next experiment:** Resolve and persist the binding workflow run ID/URL/head SHA/server `completed_at`, obtain the specified later NIST pulse, derive five eligible subjects per canonical-rank quartile, randomize equivalent-format views, and create the phased evaluator bundle. Verify native-to-baseline completeness for every required comparator before sealing; do not repair frozen outputs.
+- **Expected information gain:** Removes subject targeting and comparator omission as explanations for a win.
+- **Validation / acceptance:** Workflow run and pulse records are preserved; sample derivation is independently reproducible; no smoke/calibration entity appears; B1 is 20/20; bundle hashes and sealed ordering key are committed; evaluator declaration is ready. A rerun/replacement or failure fires Rule 0.
+- **Artifacts / docs:** `04-audit/bundle/`, `04-audit/sample-manifest.json`, `04-audit/sealed-ordering.json`
+- **Estimated scope:** Small
+
+### SA-012 — Complete the independent human audit
+
+- **Status:** Blocked (SA-011)
+- **Priority:** Critical
+- **Execution:** HUMAN GATED
+- **Category:** Evaluation
+- **Depends on:** SA-000, SA-011
+- **Problem / question:** Do untouched composites win the fixed decision task, remain accurate, offer credible substitutes, and stay cheap to correct?
+- **Next experiment:** An eligible evaluator completes the three audit phases in order. Score untouched views before provenance is unmasked or any cleanup timing begins. Judge all 60 alternatives from identity/job evidence before reading generated rationales. Then start one continuous per-card cleanup timer covering source browsing, verification, diagnosis, and editing of a separate copy.
+- **Expected information gain:** Directly measures C1, A1/A2, T1, P1, and B1 without allowing cleanup to improve scored outputs.
+- **Validation / acceptance:** Twenty complete paired judgments, 60 slot judgments, card-level alternative results, per-card provenance results, verification/diagnosis/edit subtotals and total cleanup durations, corrections/patches, evaluator declaration, and revealed ordering key. No missing field, omitted active time, or retroactive card change.
+- **Artifacts / docs:** `04-audit/results/`
+- **Estimated scope:** Medium
+
+### SA-013 — Verify objective evidence metrics across all 100 cards
+
+- **Status:** Blocked (SA-010)
+- **Priority:** Critical
+- **Execution:** CLOUD plus bounded human verification
+- **Category:** Metrics audit
+- **Depends on:** SA-010
+- **Problem / question:** Are E1/E2 totals real, version-relevant, and lineage-independent rather than uncorrected classifier output?
+- **Next experiment:** Review all 100 E1 classifications and all 100 E2 classifications against frozen observations/lineage, including explicit negatives; record false positives, false negatives, and corrections in a derived metrics layer without editing frozen cards. Audit the manual-intervention allocation ledger for the enumerated T1 activities and reconcile concentration and identity sensitivity.
+- **Expected information gain:** Gives 100-card denominators direct verification instead of extrapolating from 20.
+- **Validation / acceptance:** A reproducible metrics file lists every included/excluded entity and reason; counts reconcile to 100; initial and verified totals remain separate; no threshold is calculated from an undefined denominator.
+- **Artifacts / docs:** `05-decision/evidence-metrics.json`, `05-decision/evidence-audit.md`
+- **Estimated scope:** Medium
+
+### SA-014 — Run or explicitly skip the precommitted category Pivot probe
+
+- **Status:** Blocked (SA-012)
+- **Priority:** High
+- **Execution:** CLOUD + HUMAN GATED when triggered
+- **Category:** Conditional pivot validation
+- **Depends on:** SA-012, SA-013
+- **Problem / question:** If broad Keep fails without an early Kill, is value concentrated enough in pre-evidence categories to justify only a narrow confirmatory cycle?
+- **Next experiment:** Apply Rules 0–3 mechanically. If the probe is ineligible, commit `not-triggered` with the exact failed predicate. If eligible, select the two categories by the fixed rule, bind a new GitHub-workflow-completion plus later-NIST seed, draw five new entities per category, and repeat the untouched paired/provenance/alternative/correction audit with the same eligible evaluator standard, scoring each category separately.
+- **Expected information gain:** Makes Pivot a tested narrow hypothesis rather than post-hoc category mining.
+- **Validation / acceptance:** Either a reproducible skip record or ten complete new judgments with all Pivot integer thresholds computed. No category is renamed/reassigned after evidence or broad audit results.
+- **Artifacts / docs:** `04-audit/pivot-probe/`
+- **Estimated scope:** Medium
+
+### SA-015 — Apply the rule and close Cycle 1
+
+- **Status:** Blocked (SA-014)
+- **Priority:** Critical
+- **Execution:** CLOUD
 - **Category:** Product decision
-- **Depends on:** SA-008
-- **Problem / question:** Does the measured evidence justify Keep, a narrow category-comparison Pivot, or Kill?
-- **Known evidence:** All thresholds and precedence are fixed above; sampled estimates are directional and must show uncertainty.
-- **Hypotheses:** The result will discriminate among broad aggregation, narrow comparisons, and no project without requiring a website.
-- **Next experiment:** Recompute M1–M7 from frozen artifacts, reconcile counts to the audit, apply the first matching decision rule, and write the strongest counter-interpretation. Do not change thresholds; protocol deviations are reported with impact.
-- **Expected information gain:** Converts the data prototype into an explicit investment decision.
-- **Proposed direction after evidence:** **Keep:** plan a second cycle for user-demand testing using the existing cards. **Pivot:** plan only the named category comparison experiment. **Kill:** archive the data and reasons; do not build catalog infrastructure.
-- **Compatibility / safety:** Distinguish observed metrics from inference; do not generalize beyond the frozen popular-skill cohort.
-- **Validation / acceptance:** A reproducible metrics file yields the same counts shown in `decision.md`; the memo states exactly one Keep/Pivot/Kill outcome, the rule branch that fired, uncertainty/counterevidence, source-access limitations, and what was deliberately not built. Roadmap status/evidence are reconciled.
-- **Artifacts / docs:** `experiments/cycle-1/metrics.json`, `experiments/cycle-1/decision.md`
+- **Depends on:** SA-012, SA-013, SA-014
+- **Problem / question:** Does the frozen evidence support Keep, a narrow confirmatory Pivot, or Kill?
+- **Next experiment:** Recompute every metric from manifests/audits, apply the first matching decision rule, and write the strongest counter-interpretation. Do not change thresholds; material defects invoke Rule 0.
+- **Expected information gain:** Converts the prototype into an explicit investment decision without pretending it tested demand.
+- **Validation / acceptance:** Machine-readable metrics and `decision.md` agree; the memo states exactly one outcome and rule branch, observed facts vs inference, uncertainty/concentration/sensitivity, source-access limitations, first-draft review changes, and what was deliberately not built. ROADMAP item states are reconciled.
+- **Artifacts / docs:** `05-decision/metrics.json`, `05-decision/decision.md`
 - **Estimated scope:** Small
 
 ## Stop condition
 
-`SA-009` closes this roadmap. Do not add implementation work for a site to Cycle 1. A second roadmap is justified only by the recorded decision and must treat demand as a new assumption rather than claiming that data usefulness alone proves a product should exist.
+`SA-015` normally closes this roadmap; the Early-close procedure is the only alternative close. A Keep may create a demand-testing roadmap; a Pivot may create only the named confirmatory category-comparison cycle; a Kill archives the evidence and negative results. None authorizes a catalog site inside Cycle 1.
