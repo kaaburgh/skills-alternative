@@ -67,6 +67,22 @@ composite must beat those comparators. If the independent evaluator performs it,
 baseline views before the sealed phased bundle, which is the exposure `SA-000` and the masking design exist
 to prevent.
 
+That first horn is stated too strongly, and on its own it proves too much. The same author picks the taxonomy,
+the rubrics and the thresholds, and those are sound. A solo experimenter is an interested party at every layer
+of this project; if interest alone disqualified a judgement, nothing here would survive, and this review's own
+BF-6 deliberately accepts an author-performed pass. What singles this check out is the shape of the judgement,
+not the person making it:
+
+1. it falls **after** the outputs and the twenty drawn subjects are knowable, so precommitment is not
+   protecting it the way it protects the taxonomy and the thresholds;
+2. it **moves the primary outcome**, because it decides which views the evaluator compares when scoring C1;
+3. it **leaves no trace**, because a fact absent from a baseline is not visible in that baseline.
+
+The evaluator's Phase 2 is a real backstop but a late one: the audit phases are ordered, scoring is Phase 1 and
+baseline-completeness diagnosis is Phase 2, so an omission has already done its work on C1 by the time anyone
+could catch it. Those three properties together are what the rest of the protocol removes by freezing
+judgements before the data exists, and what this check had nothing left to freeze against.
+
 The metric with the harshest consequence in the document (`B1` below 20 fires Rule 0) is therefore the one
 whose execution is least specified.
 
