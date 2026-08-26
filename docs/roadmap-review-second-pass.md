@@ -22,17 +22,25 @@ The review asked two questions:
 
 Verification performed: manual reading of every section and item; independent recomputation of the roadmap
 dependency graph (uniqueness, resolvability, acyclicity, ready ratio, chokepoint share); independent
-recomputation of the Wilson interval claim. The pinned kit artifact `agentic-repo-kit-0.1.16.pyz` was
-downloaded and its SHA-256 matched `.agentic-repo.lock.json`, but `agentic-repo check` could not be executed
-in this environment (sandbox policy denied the invocation). The graph and interval numbers below are
-therefore this reviewer's own computation, not tool output.
+recomputation of the Wilson interval claim.
+
+`agentic-repo check` could not be executed in the review environment (the pinned kit artifact
+`agentic-repo-kit-0.1.16.pyz` was downloaded and its SHA-256 matched `.agentic-repo.lock.json`, but sandbox
+policy denied the invocation), so the graph numbers were recomputed by hand first. The pinned check then ran
+in CI on the commit that added this note — the roadmap itself is unchanged from the reviewed state — and
+returned `agentic repository contract is consistent` with `ready = 2/16 outstanding (12.5%)` and
+`chokepoint: SA-001 gates 14/16 outstanding (87.5%)`, matching the independent recomputation exactly
+([run 33008012122](https://github.com/kaaburgh/skills-alternative/actions/runs/33008012122)). The graph
+numbers below are therefore tool-confirmed; the Wilson interval numbers remain this reviewer's own
+computation, since no tool in this repository checks them.
 
 ## What holds up
 
 These are stated so a later reader does not re-litigate them:
 
 - **Graph invariants hold.** Sixteen unique IDs, every `Depends on` value resolves, the graph is acyclic, and
-  every `Status` value is inside the vocabulary that `enforce_status_vocabulary = true` makes binding.
+  every `Status` value is inside the vocabulary that `enforce_status_vocabulary = true` makes binding. The
+  pinned `agentic-repo check` confirms this mechanically, along with generated-file integrity and links.
 - **The Wilson claim is arithmetically correct.** At 15/20 the two-sided 95% Wilson interval is
   [0.531, 0.888]; at 14/20 it is [0.481, 0.855]. Fifteen really is the smallest integer whose lower bound
   clears 0.5, so the C1 threshold is derived rather than chosen.
@@ -276,7 +284,7 @@ are hash-bound before `SA-013` begins.
 
 ## Structural observations
 
-Recomputed independently, not produced by `agentic-repo check`:
+Reported by the pinned `agentic-repo check` in CI, and independently recomputed to the same values:
 
 ```
 ready = 2/16 outstanding (12.5%)   -> SA-000, SA-001
