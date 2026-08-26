@@ -267,9 +267,14 @@ are hash-bound before `SA-013` begins.
   check`, `CLOUD plus bounded human verification`, and `CLOUD + HUMAN GATED when triggered`. Only `Status` is
   check-enforced, so nothing fails — but this is the exact drift `AGENTS.md` warns about for statuses, and the
   human-gated portion of an item is decision-relevant enough to deserve a closed value.
-- **HF-3 — `Blocked (<ID>)` names only one of several blockers.** `SA-010` is `Blocked (SA-008)` but also depends
-  on `SA-009`; `SA-014` is `Blocked (SA-012)` but also depends on `SA-013`. The status field exists to make the
-  blocker readable without cross-referencing dependency fields, and a partial answer defeats that.
+- **HF-3 — `Blocked (<ID>)` names only one of several blockers, and cannot name more.** `SA-010` is
+  `Blocked (SA-008)` but also depends on `SA-009`; `SA-014` is `Blocked (SA-012)` but also depends on
+  `SA-013`. This was first written up as an authoring defect. It is not one: reading the pinned kit artifact
+  shows the status is matched by `^blocked\s*\(\s*(<ID>)\s*\)$`, which accepts exactly one ID, and with
+  `enforce_status_vocabulary = true` a two-ID value would fail the check rather than warn. A multi-blocker
+  item therefore cannot express both blockers in its status field, and choosing between two co-equal blockers
+  would only move which one is hidden. `Depends on` remains the complete answer. Recorded here as a kit
+  expressiveness limit so it is not rediscovered as a roadmap defect; no roadmap change is warranted.
 - **HF-4 — The freeze workflow's trigger is unspecified.** The binding freeze is "the first commit on `main`"
   whose named workflow succeeds, but `SA-010` does not state the workflow's trigger. The existing
   `agentic-repo-check.yml` runs on `push` (all refs) and `pull_request`, so a branch run would also succeed on
