@@ -47,6 +47,10 @@ skills.sh is mandatory for every audited subject because it defines the cohort. 
 
 For each source, the baseline is an equivalent-format view containing every decision-relevant fact present in the captured native catalog record, with no cross-source synthesis. The native capture/immutable coordinates remain available for completeness review. A pipeline-produced baseline may not omit awkward fields, warnings, setup details, or negative results. Any incomplete required baseline in the held-out sample fires Rule 0 rather than giving the composite a default win.
 
+Baseline completeness is established by a property of the data, never by attestation. `SA-003` freezes, per comparator, a **native field enumeration procedure** — how field keys and their rendered values are extracted from a capture — and a **representation rule** stating what counts as a field being represented in a baseline view. `SA-011` then runs a producer-independent validator that enumerates every native field key in each required comparator capture and lists the ones its baseline view does not represent. `B1` counts a subject complete only when that list is empty for every required comparator. No person certifies completeness and no person's judgement is needed to detect a gap, so the question of whether the party whose composite must win may vouch for its rivals' views does not arise.
+
+Both frozen procedures are validated on the calibration captures, where an omission can be introduced deliberately and the validator must catch it. The evaluator's Phase 2 remains an independent backstop: a completeness defect they find that the validator did not is evidence that the enumeration or representation rule is itself defective, which is a material protocol deviation and fires Rule 0 rather than being corrected into a pass.
+
 The independent evaluator receives the subject identity and a fixed job-to-be-done, then views the untouched composite and all available complete single-catalog views in randomized, label-masked order. For each view the evaluator records:
 
 1. `try`, `avoid`, or `insufficient`;
@@ -72,6 +76,10 @@ Evidence classes stay separate:
 
 Evidence is version-relevant only when it targets the captured revision or the claim states why it remains applicable. A card satisfies multi-origin decision evidence only when it has at least two independent lineages controlled by different owners and at least one is a version-relevant, non-author `structural_review`, `security`, `empirical_efficacy`, or `experience_report`. Author description plus adoption alone does not pass.
 
+`E1` and `E2` labels are decided by a frozen decision procedure, not by opinion. `SA-003` freezes an ordered, exhaustive set of predicates over frozen observation fields — source owner, lineage ID, evidence class, target revision, and author relationship — such that two people applying them to the same observations must produce the same label, and every emitted label records which predicate decided it. Verification is therefore re-derivation, not review.
+
+Who re-derives is stated rather than assumed. The first pass may be run by whoever built the pipeline, because a frozen predicate set makes the work reproducible rather than discretionary; `SA-013` records that this pass is author-performed and not independent, and the decision memo repeats it wherever `E1` or `E2` is used. Independence comes from a second pass: once the evaluator's audit results are committed and hash-bound, the same eligible evaluator re-derives a deterministic 20-classification sample drawn from the frozen observations. More than two disagreements discards the first pass, and all 200 classifications must be re-derived before any threshold uses `E1` or `E2`; if that cannot be completed, Keep and Pivot are ineligible and Rule 0 fires. Drawing the sub-sample only after the audit is committed keeps the evaluator's paired judgements uncontaminated by evidence classifications.
+
 Differences are labelled contradictions only when they address the same proposition under materially comparable versions, models, harnesses, and tasks. Otherwise the card preserves them as context, stale-version evidence, or non-comparability.
 
 ### Immutable artifact layers
@@ -90,7 +98,7 @@ experiments/cycle-1/manifests/
 
 Each producer writes a manifest containing input hashes, output hashes, producer command/version, timestamp, and manual interventions. A source capture is labelled `stored`, `externally_immutable`, or `metadata_only`; only the first two are called replayable. Observations are source-faithful extractions, claims normalize propositions and conditions, and cards synthesize claims. A derived layer consumes only frozen hashes from the preceding layer.
 
-The binding output freeze is the first commit on `main` containing `experiments/cycle-1/manifests/output-freeze.json` whose GitHub Actions workflow named `Cycle 1 output freeze` succeeds. That workflow must run ARK validation plus clean-checkout regeneration and manifest reconciliation. Its GitHub-hosted run ID, URL, `head_sha`, and server-recorded `completed_at` are preserved in the audit manifest. Re-running/replacing that successful freeze or editing an eligible card/baseline afterward is a material protocol deviation and fires Rule 0.
+The binding output freeze is the first commit on `main` containing `experiments/cycle-1/manifests/output-freeze.json` whose GitHub Actions workflow named `Cycle 1 output freeze` succeeds. That workflow must run ARK validation plus clean-checkout regeneration and manifest reconciliation. Its GitHub-hosted run ID, URL, `head_sha`, `run_attempt`, `run_started_at`, and server-recorded `completed_at` are preserved in the audit manifest. A run binds only when `run_attempt` is 1. A re-run keeps the same run ID while advancing `completed_at`, so without the attempt number the recorded fields cannot distinguish a first success from a third, and a silent re-run would move the `completed_at` boundary that selects the qualifying NIST pulse and therefore the twenty held-out subjects. A commit whose first attempt failed simply does not qualify; the next freeze commit's own first attempt may bind, and that is not a deviation. Re-running or replacing an already-binding successful freeze, or editing an eligible card/baseline afterward, is a material protocol deviation and fires Rule 0.
 
 ### Calibration, held-out sampling, and evaluator independence
 
@@ -102,7 +110,9 @@ Only the held-out **algorithm and rank-quartile strata** are precommitted. The a
 SHA-256(output_freeze_commit_sha || output_freeze_workflow_run_id || nist_beacon_output_value || "skills-alternative-cycle-1-audit-v1")
 ```
 
-where `nist_beacon_output_value` is the first [NIST Randomness Beacon 2.0](https://csrc.nist.gov/projects/interoperable-randomness-beacons/beacon-20) pulse timestamped at least two minutes after the binding workflow run's GitHub-server-recorded `completed_at`. The algorithm shuffles eligible entities within canonical-rank quartiles and chooses five per quartile. The smoke/calibration exclusions and deterministic replacement rule are applied before selection. A replacement/rerun after seeing the pulse invalidates the experiment.
+where `nist_beacon_output_value` is the first [NIST Randomness Beacon 2.0](https://csrc.nist.gov/projects/interoperable-randomness-beacons/beacon-20) pulse timestamped at least two minutes after the binding workflow run's GitHub-server-recorded `completed_at`. The algorithm shuffles eligible entities within canonical-rank quartiles and chooses five per quartile. Every exclusion — the smoke subject and the ten calibration entities — is removed from the eligible pool before the shuffle, so the draw cannot land on an ineligible entity and no replacement step exists. Each quartile must hold at least five eligible entities before the draw; if one does not, a required denominator is undefined and Rule 0 fires.
+
+After the draw no subject may be substituted, for any reason. A drawn subject that proves unauditable is not swapped out: it is carried into the audit and resolved by the rule covering its defect, which for an incomplete required comparator capture is `B1` and Rule 0. Substitution is the mechanism by which an inconvenient subject would quietly become a convenient one, so the protocol has none. Rerunning the draw once the pulse is knowable invalidates the experiment.
 
 The evaluator must be a human who did not create or tune the pipeline, schemas, rubrics, source mappings, cards, baselines, or thresholds, and who has not seen the card outputs before receiving the sealed bundle. The evaluator receives the task/rubric but not threshold values. If no such evaluator is available, Keep and Pivot are ineligible and Rule 0 fires.
 
@@ -125,7 +135,7 @@ T1 includes every human action outside smoke/calibration tuning whose absence wo
 | A2 | Cards with at least two correct alternatives | 20 cards; Keep/Pivot eligibility requires at least 16 |
 | T1 | Card-specific human correction time | 20 cards; median at most 5 minutes, at most 2 cards over 10 minutes; unusable = 15 minutes |
 | P1 | Cards whose every decision-relevant factual claim is supported by the cited origin/conditions | 20 cards; at least 19, with zero critical identity/provenance errors |
-| B1 | Audited subjects with complete required comparator capture | 20 cards; must be 20 or Rule 0 fires |
+| B1 | Audited subjects whose required comparator baselines represent every native field key | 20 cards; established by the frozen validator rather than by attestation; must be 20 or Rule 0 fires |
 
 Every prototype card must contain three populated, valid candidate edges before output freeze (300 total). Their `target_canonical_id` values must be pairwise distinct, differ from the subject ID, and belong to three distinct canonical identity groups; a copy/fork or another version of the subject cannot fill a slot. Inability to do so is a substantive alternatives-graph Kill, not an empty or duplicated slot. Any invalid emitted target is a critical A1/A2 failure. Recall is explicitly unknown. Alternative slot judgments are clustered by card; report both slot totals and card-level results rather than treating 60 slots as independent observations.
 
@@ -135,7 +145,7 @@ Report raw counts, the initial and corrected identity error rates, publisher/rep
 
 Apply the first matching rule:
 
-0. **Kill — experiment invalid, no product inference** if the exact cohort/candidate capture or mandatory comparator capture fails; the held-out subjects become knowable before output freeze; smoke/calibration leaks into an audit; evaluator independence fails; a required denominator is zero/undefined; manifests/hashes do not reconcile; a binding output/workflow is replaced or rerun; unlogged/reclassified entity-specific work is found; or a material protocol deviation can affect any threshold.
+0. **Kill — experiment invalid, no product inference** if the exact cohort/candidate capture or mandatory comparator capture fails; the held-out subjects become knowable before output freeze; smoke/calibration leaks into an audit; evaluator independence fails; a required denominator is zero/undefined; a held-out quartile holds fewer than five eligible entities; a held-out subject is substituted after the draw; manifests/hashes do not reconcile; a binding output/workflow is replaced or rerun, or binds on a run whose `run_attempt` is not 1; a baseline-completeness defect escapes the frozen validator; the `E1`/`E2` re-derivation cannot be completed; unlogged/reclassified entity-specific work is found; or a material protocol deviation can affect any threshold.
 1. **Kill — evidence/alternatives layer not viable** if the prototype cannot populate three canonicalized alternatives on every card, E1 is below 25/100, C1 is at most 4/20 (individual catalogs tie/beat the composite on at least 16/20), P1 is below 19/20, or any critical identity/provenance error exists.
 2. **Keep** only if E1 is at least 60/100, E2 at least 30/100, C1 at least 15/20, A1 at least 48/60, A2 at least 16/20, T1 passes both bounds, P1 is at least 19/20 with zero critical errors, and B1 is 20/20.
 3. **Run the precommitted category Pivot probe** only if neither prior rule fires, E1 is at least 25/100, A1/A2/T1/P1/B1 pass, and the pre-evidence taxonomy contains at least two primary categories with at least ten cohort entities, at least five still eligible after all exclusions, and verified E1 coverage of at least 60% each. Select the two eligible categories with the highest verified E1 rate (ties: larger category, then category ID), never by composite audit outcome. Use a new post-workflow NIST seed to select five previously unaudited/non-calibration entities per category. **Pivot** only if **each category independently** has at least 4/5 untouched composite wins, 4/5 verified E1 cards, 12/15 correct alternative slots, 4/5 cards with two correct alternatives, median correction at most five minutes with no card over ten, 5/5 provenance passes, and 5/5 complete comparators. Pivot means “fund a confirmatory narrow category-comparison cycle,” not “the category product is validated.”
@@ -182,9 +192,9 @@ role may be performed by whoever built the pipeline — is an evaluator-independ
 - **Category:** Evaluation governance
 - **Depends on:** None
 - **Problem / question:** Is an evaluator available who can remain independent of pipeline/rubric construction and unseen outputs until the sealed audit?
-- **Next experiment:** Identify one human evaluator, disclose the role and time commitment without showing thresholds or future outputs, record conflicts/relationship, and agree on custody of the phased bundle and ordering key. The evaluator may withdraw before seeing outputs without invalidating work; replacement must satisfy the same declaration before bundle delivery.
+- **Next experiment:** Identify one human evaluator, disclose the role and time commitment without showing thresholds or future outputs, record conflicts/relationship, and agree on custody of the phased bundle and ordering key. The disclosed commitment covers the three audit phases and the post-audit `SA-013` re-derivation sample, which begins only after the audit results are committed and hash-bound. The evaluator may withdraw before seeing outputs without invalidating work; replacement must satisfy the same declaration before bundle delivery.
 - **Expected information gain:** Removes a predictable late-stage blocker and prevents developer self-review from being relabelled independent after the cards exist.
-- **Validation / acceptance:** A signed/acknowledged eligibility and confidentiality-of-thresholds declaration, contact-independent handoff procedure, withdrawal/replacement rule, and expected audit phases are stored without exposing any card output.
+- **Validation / acceptance:** A signed/acknowledged eligibility and confidentiality-of-thresholds declaration, contact-independent handoff procedure, withdrawal/replacement rule, and expected audit phases including the post-audit re-derivation sample are stored without exposing any card output.
 - **Artifacts / docs:** `docs/evaluator-handoff.md`, `experiments/cycle-1/04-audit/evaluator-declaration-template.md`
 - **Estimated scope:** Small
 
@@ -224,9 +234,9 @@ role may be performed by whoever built the pipeline — is an evaluator-independ
 - **Category:** Experiment protocol
 - **Depends on:** SA-001, SA-002
 - **Problem / question:** Can the experiment be specified so that later missing sources, categories, and outputs cannot change what counts as success?
-- **Next experiment:** Turn the fixed contract above and source-feasibility results into a versioned protocol. Name exact external-search provider/API or disable that source for the entire cohort; freeze locale, aliases, query templates, result depth, exclusion rules, and “first N qualifying results regardless of sentiment.” Freeze a finite primary job-to-be-done taxonomy and assignment rubric before external evidence is processed. Freeze comparator completeness, evaluator eligibility, masking, correction timing, NIST sampling, and Rule 0.
+- **Next experiment:** Turn the fixed contract above and source-feasibility results into a versioned protocol. Name exact external-search provider/API or disable that source for the entire cohort; freeze locale, aliases, query templates, result depth, exclusion rules, and “first N qualifying results regardless of sentiment.” Freeze a finite primary job-to-be-done taxonomy and assignment rubric before external evidence is processed. Freeze comparator completeness, evaluator eligibility, masking, correction timing, NIST sampling, and Rule 0. Four of these are named separately because a later item would otherwise have to invent them: (a) the per-comparator native field enumeration procedure and representation rule that make baseline completeness machine-decidable; (b) the ordered predicate set that decides every `E1`/`E2` label from frozen observation fields, and the two-pass re-derivation with its 20-classification sample and two-disagreement bound; (c) the binding-freeze field set including `run_attempt`, `run_started_at`, and the attempt-1 requirement; (d) the held-out draw with exclusions removed from the eligible pool before the shuffle, the five-per-quartile precondition, and the prohibition on post-draw substitution.
 - **Expected information gain:** Removes cohort, comparator, search, category, and audit degrees of freedom before the final data exists.
-- **Validation / acceptance:** `experiment-protocol.md` contains exact integer formulas, no placeholder source or fallback, a deviation log, evaluator declaration, paired task, calibration/held-out/pivot algorithms, and a worked synthetic decision example. Thresholds match this roadmap byte-for-byte.
+- **Validation / acceptance:** `experiment-protocol.md` contains exact integer formulas, no placeholder source or fallback, a deviation log, evaluator declaration, paired task, calibration/held-out/pivot algorithms, and a worked synthetic decision example. Thresholds match this roadmap byte-for-byte. The completeness validator and the `E1`/`E2` predicate set are executable and are demonstrated on the calibration captures: a deliberately omitted native field must be caught, and two independent applications of the predicate set to the same calibration observations must produce identical labels. A procedure that cannot be demonstrated is not frozen.
 - **Artifacts / docs:** `docs/experiment-protocol.md`, `experiments/cycle-1/protocol-deviations.md`
 - **Estimated scope:** Medium
 
@@ -334,7 +344,7 @@ role may be performed by whoever built the pipeline — is an evaluator-independ
 - **Problem / question:** Can the frozen pipeline emit the complete prototype without per-card authorship?
 - **Next experiment:** From a clean checkout, generate claims, all available complete single-catalog baselines, 100 composite cards, three populated canonicalized alternative edges each, coverage, and the intervention-allocation log. Do not inspect a future held-out subset. Commit `output-freeze.json` with all hashes and producer versions and add the fixed `Cycle 1 output freeze` workflow. Do not bind the freeze before `SA-000` has secured an eligible evaluator: an absent evaluator makes Keep and Pivot ineligible and fires Rule 0, so freezing first converts a cheap early block into a terminal Kill after the whole acquisition and synthesis cost has been paid.
 - **Expected information gain:** Produces the exact untouched objects whose value and maintenance cost will be measured.
-- **Validation / acceptance:** Exactly 100 canonical JSON and Markdown composites; required baselines and native coordinates; 300 valid alternative edges, each card having three pairwise-distinct, non-self targets from distinct canonical identity groups; byte-stable regeneration; no unsupported claims; all manual interventions allocated/reconciled. If 300 valid edges cannot be produced, apply the early substantive Kill. Otherwise the first commit whose named GitHub-hosted workflow succeeds becomes binding.
+- **Validation / acceptance:** Exactly 100 canonical JSON and Markdown composites; required baselines and native coordinates; 300 valid alternative edges, each card having three pairwise-distinct, non-self targets from distinct canonical identity groups; byte-stable regeneration; no unsupported claims; all manual interventions allocated/reconciled. If 300 valid edges cannot be produced, apply the early substantive Kill. Otherwise the first commit whose named GitHub-hosted workflow succeeds on `run_attempt` 1 becomes binding.
 - **Artifacts / docs:** `02-claims/`, `03-cards/`, `manifests/output-freeze.json`
 - **Estimated scope:** Medium
 
@@ -342,13 +352,13 @@ role may be performed by whoever built the pipeline — is an evaluator-independ
 
 - **Status:** Blocked (SA-010)
 - **Priority:** Critical
-- **Execution:** CLOUD + HUMAN (comparator-completeness check)
+- **Execution:** CLOUD
 - **Category:** Audit preparation
 - **Depends on:** SA-000, SA-010
 - **Problem / question:** Can the audit subjects and view ordering be selected after outputs are immutable, with no missing/straw comparator advantage?
-- **Next experiment:** Resolve and persist the binding workflow run ID/URL/head SHA/server `completed_at`, obtain the specified later NIST pulse, derive five eligible subjects per canonical-rank quartile, randomize equivalent-format views, and create the phased evaluator bundle. Verify native-to-baseline completeness for every required comparator before sealing; do not repair frozen outputs.
+- **Next experiment:** Resolve and persist the binding workflow run ID/URL/head SHA/`run_attempt`/`run_started_at`/server `completed_at`, obtain the specified later NIST pulse, derive five eligible subjects per canonical-rank quartile from a pool the exclusions were removed from, randomize equivalent-format views, and create the phased evaluator bundle. Run the frozen completeness validator over every required comparator capture and its baseline view before sealing; do not repair frozen outputs.
 - **Expected information gain:** Removes subject targeting and comparator omission as explanations for a win.
-- **Validation / acceptance:** Workflow run and pulse records are preserved; sample derivation is independently reproducible; no smoke/calibration entity appears; B1 is 20/20; bundle hashes and sealed ordering key are committed; evaluator declaration is ready. A rerun/replacement or failure fires Rule 0.
+- **Validation / acceptance:** Workflow run and pulse records are preserved, including `run_attempt` 1; sample derivation is independently reproducible; every quartile held at least five eligible entities; no smoke/calibration entity appears and no subject was substituted after the draw; the completeness validator reports no unrepresented native field key, so B1 is 20/20; bundle hashes and sealed ordering key are committed; evaluator declaration is ready. A rerun/replacement or failure fires Rule 0.
 - **Artifacts / docs:** `04-audit/bundle/`, `04-audit/sample-manifest.json`, `04-audit/sealed-ordering.json`
 - **Estimated scope:** Medium
 
@@ -362,7 +372,7 @@ role may be performed by whoever built the pipeline — is an evaluator-independ
 - **Problem / question:** Do untouched composites win the fixed decision task, remain accurate, offer credible substitutes, and stay cheap to correct?
 - **Next experiment:** An eligible evaluator completes the three audit phases in order. Score untouched views before provenance is unmasked or any cleanup timing begins. Judge all 60 alternatives from identity/job evidence before reading generated rationales. Then start one continuous per-card cleanup timer covering source browsing, verification, diagnosis, and editing of a separate copy.
 - **Expected information gain:** Directly measures C1, A1/A2, T1, P1, and B1 without allowing cleanup to improve scored outputs.
-- **Validation / acceptance:** Twenty complete paired judgments, 60 slot judgments, card-level alternative results, per-card provenance results, verification/diagnosis/edit subtotals and total cleanup durations, corrections/patches, evaluator declaration, and revealed ordering key. No missing field, omitted active time, or retroactive card change.
+- **Validation / acceptance:** Twenty complete paired judgments, 60 slot judgments, card-level alternative results, per-card provenance results, verification/diagnosis/edit subtotals and total cleanup durations, corrections/patches, evaluator declaration, and revealed ordering key. No missing field, omitted active time, or retroactive card change. The evaluator's `SA-013` re-derivation sample must not begin until these results are committed and hash-bound.
 - **Artifacts / docs:** `04-audit/results/`
 - **Estimated scope:** Medium
 
@@ -370,15 +380,17 @@ role may be performed by whoever built the pipeline — is an evaluator-independ
 
 - **Status:** Blocked (SA-010)
 - **Priority:** Critical
-- **Execution:** CLOUD + HUMAN (bounded E1/E2 verification)
+- **Execution:** CLOUD + HUMAN (frozen-predicate re-derivation)
 - **Category:** Metrics audit
 - **Depends on:** SA-010
-- **Problem / question:** Are E1/E2 totals real, version-relevant, and lineage-independent rather than uncorrected classifier output?
-- **Next experiment:** Review all 100 E1 classifications and all 100 E2 classifications against frozen observations/lineage, including explicit negatives; record false positives, false negatives, and corrections in a derived metrics layer without editing frozen cards. Audit the manual-intervention allocation ledger for the enumerated T1 activities and reconcile concentration and identity sensitivity.
-- **Expected information gain:** Gives 100-card denominators direct verification instead of extrapolating from 20.
-- **Validation / acceptance:** A reproducible metrics file lists every included/excluded entity and reason; counts reconcile to 100; initial and verified totals remain separate; no threshold is calculated from an undefined denominator.
+- **Problem / question:** Are E1/E2 totals real, version-relevant, and lineage-independent rather than uncorrected classifier output, and is the verification itself trustworthy given who performs it?
+- **Next experiment:** Re-derive all 100 E1 and all 100 E2 labels from the frozen observations using the `SA-003` predicate set, including explicit negatives, recording for each label the predicate that decided it and any disagreement with the pipeline's initial label. Corrections land in a derived metrics layer without editing frozen cards. Audit the manual-intervention allocation ledger for the enumerated T1 activities and reconcile concentration and identity sensitivity. Then, once `SA-012`'s results are committed and hash-bound, have the same eligible evaluator re-derive the deterministic 20-classification sample.
+- **Expected information gain:** Gives 100-card denominators direct verification instead of extrapolating from 20, and measures whether the frozen predicate set actually produces the same labels in two hands.
+- **Validation / acceptance:** A reproducible metrics file lists every included/excluded entity and reason; counts reconcile to 100; initial and verified totals remain separate; every label names its deciding predicate; no threshold is calculated from an undefined denominator. The file and the decision memo state that the first pass is author-performed and not independent. The evaluator sample records at most two disagreements; more discards the first pass and requires all 200 to be re-derived before any threshold uses E1 or E2, failing which Keep and Pivot are ineligible and Rule 0 fires.
 - **Artifacts / docs:** `05-decision/evidence-metrics.json`, `05-decision/evidence-audit.md`
-- **Estimated scope:** Medium
+- **Slice budget:** 0/2
+- **Remaining slices:** (1) the author-performed re-derivation of all 200 labels plus the intervention-ledger audit, runnable as soon as `SA-010` lands — an `E1` below the Rule 1 floor here fires the early substantive Kill without spending evaluator time; (2) the evaluator's 20-classification sample, which requires `SA-012` complete and hash-bound, and without which this item is not finished.
+- **Estimated scope:** Large
 
 ### SA-014 — Run or explicitly skip the precommitted category Pivot probe
 
