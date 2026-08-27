@@ -6,6 +6,12 @@ capture declares it: the recorded SHA-256 is checked by re-hashing the file, the
 counting rows, the request by string-comparing it to the contract URL. A capture cannot pass
 this by asserting that it is valid.
 
+One property cannot be seen inside a single capture: whether a frozen capture was later
+replaced by a newer one. A re-capture is internally consistent and would pass every check
+above while silently changing the population Cycle 1 measures. That is caught here instead
+from git, which does record it: once committed, the capture must remain byte-identical to
+what was committed.
+
 Exit 0 = every required property holds. Exit 1 = at least one does not; each failure names the
 property that is missing rather than only that something is wrong.
 """
@@ -29,6 +35,41 @@ results: list[tuple[bool, str, str]] = []
 def check(ok: bool, name: str, detail: str = "") -> bool:
     results.append((ok, name, detail))
     return ok
+
+
+def check_freeze_state(root: Path, paths: list[Path]) -> None:
+    """A capture that git already tracks must still match what was committed.
+
+    Untracked files are the ordinary first-capture state, so that is reported rather than
+    failed. A tracked file that differs from HEAD means the frozen input was edited or
+    re-captured in place, which no check inside the capture itself could reveal.
+    """
+    def git(*args: str) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(["git", *args], cwd=root, capture_output=True, text=True)
+
+    if git("rev-parse", "--is-inside-work-tree").returncode != 0:
+        check(True, "freeze state: not a git work tree, skipped")
+        return
+
+    tracked, modified = [], []
+    for p in paths:
+        rel = str(p.relative_to(root))
+        if git("ls-files", "--error-unmatch", "--", rel).returncode != 0:
+            continue
+        tracked.append(rel)
+        if git("diff", "--quiet", "HEAD", "--", rel).returncode != 0:
+            modified.append(rel)
+
+    if not tracked:
+        check(True, "freeze state: capture is not yet committed (first capture)",
+              "commit it to freeze the population Cycle 1 measures")
+        return
+    if len(tracked) != len(paths):
+        check(False, "freeze state: every capture file is committed together",
+              f"only {tracked} are tracked; a partially committed capture cannot be frozen")
+    check(not modified,
+          "freeze state: the committed capture is unmodified",
+          f"changed since commit: {modified} - a frozen input was replaced in place" if modified else "")
 
 
 def main() -> int:
@@ -78,6 +119,9 @@ def main() -> int:
           "no credential header was stored")
     check("<redacted>" in json.dumps(meta.get("request_headers_sent", [])),
           "the recorded request headers keep the token redacted")
+
+    # --- freeze state: a committed capture must not have been replaced ---------------------
+    check_freeze_state(root, [body_p, headers_p, req_p])
 
     # --- the payload is the population the contract claims to study ------------------------
     try:

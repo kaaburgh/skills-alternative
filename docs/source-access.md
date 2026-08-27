@@ -126,10 +126,23 @@ set -a; . /path/to/.env.local; set +a
 The script writes `experiments/cycle-1/00-inputs/skills-sh/` and never stores the token or any
 request header carrying it.
 
+**The capture is frozen once taken.** It defines the population every later Cycle 1 measurement is
+made against, so the script refuses to run when a capture already exists — before spending a
+request — and prints the existing capture's retrieval time and hash instead. It captures into a
+staging directory and promotes only on success, so a failed or partial run leaves the canonical
+path untouched. A second run would otherwise produce a newer snapshot that is internally consistent
+and passes every verification below, while silently changing that population. Replacing a capture
+deliberately means removing it in its own reviewable commit first, so the replacement appears in
+history rather than as an edit in place.
+
 **Verification.** `scripts/verify-skills-sh-capture.py` checks the capture against the acceptance
 criteria by recomputing them from the bytes on disk — hash, row count, pagination echo, identifier
 uniqueness, install-count ordering, exact request URL — rather than trusting anything the capture
-declares about itself. A capture that passes has the provenance `SA-001` requires; one that fails
+declares about itself. One property is invisible inside a single capture: whether a frozen capture
+was later replaced. A re-capture is internally consistent and would pass every other check. So the
+verifier also reads git, which does record it — a committed capture must still match what was
+committed — and reports an uncommitted capture as the ordinary first-capture state rather than
+failing it. A capture that passes has the provenance `SA-001` requires; one that fails
 names the missing property. Run it after the capture, and again in review:
 
 ```bash
