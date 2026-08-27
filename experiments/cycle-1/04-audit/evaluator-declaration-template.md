@@ -45,6 +45,14 @@ I understand that the audit is intentionally phased and that information availab
 - [ ] I will preserve required results, timing records, corrections, and other audit artifacts through the agreed handoff path.
 - [ ] I understand that the sealed ordering material is handled according to the later frozen audit protocol rather than revealed early.
 
+## Post-audit evidence re-derivation commitment
+
+After the three audit phases are complete and their results are committed and hash-bound, the same evaluator is used for the independent `SA-013` evidence-classification check. The exact classifications are selected by the frozen protocol only after the audit is bound.
+
+- [ ] I agree to complete the required post-audit `SA-013` re-derivation sample when it is released to me.
+- [ ] I understand that the frozen protocol may require an expanded re-derivation, potentially covering all 200 E1/E2 classifications, if the sample does not validate the first pass; I agree to complete that required expansion or to report inability/withdrawal rather than silently substituting another procedure.
+- [ ] I will not inspect or seek Cycle 1 decision thresholds while this post-audit evaluator work remains incomplete.
+
 ## Withdrawal and exposure
 
 - [ ] I understand that I may withdraw before seeing audit outputs; a replacement must independently satisfy this declaration before receiving them.
