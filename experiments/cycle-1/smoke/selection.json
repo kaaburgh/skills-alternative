@@ -1,0 +1,17 @@
+{
+  "selected_at_utc": "2026-08-27T13:36:48Z",
+  "rule": "index = int(SHA-256(seed), 16) mod len(pool); pool = sorted(unique <loc> across both public skill sitemaps)",
+  "seed": "skills-alternative-cycle-1-smoke-subject-v1",
+  "pool_source": [
+    "https://www.skills.sh/sitemap-skills-1.xml",
+    "https://www.skills.sh/sitemap-skills-2.xml"
+  ],
+  "pool_source_sha256": {
+    "sitemap-skills-1.xml": "693b78699ddc0529157fee0c873d54d626f3e93120c53466e9887ac2fb2c5d31",
+    "sitemap-skills-2.xml": "1812d9d1312aea5a9e642da8d4a343efbf882ab387011adb6ebf1ce281fad077"
+  },
+  "pool_size_raw": 20000,
+  "pool_size_unique": 20000,
+  "selected_index": 13111,
+  "smoke_subject_url": "https://www.skills.sh/noizai/skills/sound-fx"
+}
