@@ -10,6 +10,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import subprocess
 import sys
 import urllib.error
 import urllib.parse
@@ -133,6 +134,46 @@ def ensure_absent(paths: list[Path]) -> None:
         raise RuntimeError("refusing to overwrite immutable capture file(s): " + ", ".join(existing))
 
 
+def git_immutability_state(path: Path) -> str:
+    """Return capture git state and reject edits to an already tracked capture."""
+    try:
+        root_result = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        return "git_unavailable"
+
+    repo_root = Path(root_result.stdout.strip()).resolve()
+    try:
+        relative_path = path.resolve().relative_to(repo_root)
+    except ValueError:
+        return "outside_repository"
+
+    tracked = subprocess.run(
+        ["git", "ls-files", "--error-unmatch", "--", str(relative_path)],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+    )
+    if tracked.returncode != 0:
+        return "untracked_first_capture"
+
+    diff = subprocess.run(
+        ["git", "diff", "--quiet", "HEAD", "--", str(relative_path)],
+        cwd=repo_root,
+    )
+    if diff.returncode == 0:
+        return "tracked_unchanged_from_head"
+    if diff.returncode == 1:
+        raise ValueError(
+            f"tracked capture differs from HEAD: {relative_path}; refusing a silently replaced frozen input"
+        )
+    raise RuntimeError(f"git diff failed while checking immutable capture: {relative_path}")
+
+
 def capture(output_dir: Path) -> int:
     token = os.environ.get("VERCEL_OIDC_TOKEN")
     if not token:
@@ -244,7 +285,14 @@ def main() -> int:
     try:
         if args.validate_body:
             body = args.validate_body.read_bytes()
-            print(json.dumps(validate_payload(body) | {"response_body_sha256": sha256_bytes(body)}, sort_keys=True))
+            git_state = git_immutability_state(args.validate_body)
+            print(
+                json.dumps(
+                    validate_payload(body)
+                    | {"response_body_sha256": sha256_bytes(body), "git_immutability_state": git_state},
+                    sort_keys=True,
+                )
+            )
             return 0
         return capture(args.output_dir)
     except (OSError, RuntimeError, ValueError) as exc:
