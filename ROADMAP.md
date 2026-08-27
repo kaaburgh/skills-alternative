@@ -202,16 +202,19 @@ role may be performed by whoever built the pipeline — is an evaluator-independ
 
 ### SA-001 — Freeze the official ranked input and candidate universe
 
-- **Status:** Investigation first
+- **Status:** Partially implemented
 - **Priority:** Critical
-- **Execution:** CLOUD RESEARCH + GATED (permitted skills.sh authentication, or an operator capture of the same request)
+- **Execution:** CLOUD RESEARCH + GATED (a Vercel OIDC token from a Vercel project with OIDC Federation enabled — the provider's only documented credential)
 - **Category:** Acquisition gate
 - **Depends on:** None
 - **Problem / question:** Can Cycle 1 obtain the exact official ranking it claims to study without a hand-picked fallback?
-- **Next experiment:** Execute the fixed skills.sh request above through Vercel OIDC. If this environment cannot, attempt one bounded operator handoff for a capture of the same request. Do not inspect subject-specific evidence first.
+- **Known evidence:** The access investigation is complete and recorded in `docs/source-access.md`. The contract request is valid as written: the provider documents `per_page` as 1–500, `view=all-time` and 0-indexed `page`, so `per_page=500` sits at the documented maximum. `robots.txt` disallows `/api/`, but the same site publishes an API reference for those endpoints, specifies how to authenticate, and states per-credential rate limits, so the directive is ordinary anti-indexing rather than a prohibition on the access the provider itself documents; unauthenticated or crawling access to `/api/` remains out of bounds and was not performed. The terms permit storing results ("caching results on your own infrastructure, is encouraged and not restricted"), so the capture qualifies for the `stored` label. Authentication is a Vercel OIDC token bound to a Vercel team and project — an organisational identity no agent sandbox can mint, and the provider documents no API key, signup, or unauthenticated tier. This is an operator handoff, not a project-level unavailability.
+- **Next experiment:** Slice 2 only. The operator runs `scripts/capture-skills-sh.sh` once with a Vercel OIDC token and commits `00-inputs/skills-sh/`; `scripts/verify-skills-sh-capture.py` then establishes the acceptance properties. Do not inspect subject-specific evidence first. Rule 0 fires only if the operator path also fails — not because this environment lacks the credential.
 - **Expected information gain:** Establishes whether the stated population and bounded alternative universe exist as a defensible input.
-- **Validation / acceptance:** `00-inputs/skills-sh/` contains the raw 500-row response, request/response metadata, retrieval time, SHA-256, schema validation, rank monotonicity/uniqueness checks, and acquisition-attempt log. Failure records Rule 0 and stops the cycle.
-- **Artifacts / docs:** `experiments/cycle-1/00-inputs/skills-sh/`, `docs/source-access.md`
+- **Validation / acceptance:** `00-inputs/skills-sh/` contains the raw 500-row response, request/response metadata, retrieval time, SHA-256, schema validation, rank monotonicity/uniqueness checks, and acquisition-attempt log. `scripts/verify-skills-sh-capture.py` must exit 0: it recomputes each property from the bytes on disk — re-hashing the body, counting rows, comparing the recorded request against the contract URL — so a capture cannot satisfy it by declaring itself valid. Failure of both the agent and operator paths records Rule 0 and stops the cycle.
+- **Artifacts / docs:** `experiments/cycle-1/00-inputs/skills-sh/`, `docs/source-access.md`, `scripts/capture-skills-sh.sh`, `scripts/verify-skills-sh-capture.py`
+- **Slice budget:** 1/2
+- **Remaining slices:** (2) the operator-executed capture plus its verification. Slice 1 produced no end-to-end output on purpose: the narrow path is gated on a credential tied to a Vercel account, so the capture could not be attempted from here. What it did produce is the access determination, the storage-rights and robots findings, the attempt log, and both scripts, leaving slice 2 as a single command plus a check.
 - **Estimated scope:** Small
 
 ### SA-002 — Emit one real card and a source-feasibility matrix
