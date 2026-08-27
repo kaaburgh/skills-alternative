@@ -6,7 +6,7 @@ This document is the repository-side procedure for `SA-000`. It prepares an inde
 
 Secure one human evaluator before any audit output is exposed. The evaluator must be independent of construction and tuning of the experiment and must not know the Cycle 1 decision thresholds while performing the audit.
 
-The operator may explain the project goal, the evaluator role, expected workload, the fixed decision task, and the ordered audit phases. Do not provide future card outputs, held-out identities, ordering material, or threshold values during recruitment.
+The operator may explain the project goal, the evaluator role, expected workload, the fixed decision task, the ordered audit phases, and the later `SA-013` evidence re-derivation workload. Do not provide future card outputs, held-out identities, ordering material, or threshold values during recruitment.
 
 ## Eligibility before output exposure
 
@@ -18,14 +18,15 @@ The acknowledgement must establish that the evaluator:
 - did not create or tune the pipeline, schemas, rubrics, source mappings, cards, baselines, or decision thresholds;
 - has not seen Cycle 1 card outputs;
 - records any relationship or conflict that could reasonably affect independence;
-- has not inspected the decision thresholds and agrees not to seek them until the audit work is complete;
-- understands the three ordered audit phases and the custody rules below.
+- has not inspected the decision thresholds and agrees not to seek them until the required evaluator work is complete;
+- understands the three ordered audit phases and the custody rules below;
+- accepts the post-audit `SA-013` re-derivation sample and the possibility that the frozen protocol may require an expanded re-derivation, potentially covering all 200 E1/E2 classifications.
 
 A project contributor who fails any of these conditions is not made independent by signing the form.
 
 ## Recruitment and acknowledgement
 
-1. Give the candidate only the role description, expected workload, fixed decision task, and phase description needed for informed consent.
+1. Give the candidate only the role description, expected workload, fixed decision task, phase description, and post-audit re-derivation workload needed for informed consent.
 2. Ask the candidate to disclose relevant relationship/conflict information and whether they have contributed to any prohibited construction/tuning work.
 3. Keep the threshold values and all future outputs out of the recruitment packet.
 4. Obtain a dated signed or otherwise durable acknowledgement of the declaration before bundle delivery.
@@ -59,6 +60,10 @@ Keep timing running as required while the evaluator edits a separate copy. Never
 
 The ordering key is revealed only at the point prescribed by the later sealed-bundle protocol, after it can no longer influence earlier judgments.
 
+### After the audit — SA-013 re-derivation
+
+Do not begin the evaluator's evidence-classification re-derivation until the three-phase audit results are committed and hash-bound. Then provide only the deterministic sample selected by the frozen `SA-013` procedure and the frozen predicates needed to re-derive its labels. If that procedure requires an expanded re-derivation, preserve the same evaluator and follow the frozen expansion rule rather than inventing a replacement or a weaker check.
+
 ## Withdrawal and replacement
 
 If the evaluator withdraws **before seeing any audit output**, record the withdrawal without exposing outputs and recruit a replacement. The replacement must satisfy and acknowledge the same eligibility declaration before bundle delivery; the withdrawal alone does not invalidate prior pipeline work.
@@ -73,6 +78,7 @@ When an evaluator is secured, the repository record for `SA-000` should contain 
 - dated eligibility/threshold-confidentiality acknowledgement;
 - disclosed relationship/conflict information sufficient to judge independence;
 - acknowledgement that the ordered phases and custody boundary are understood;
+- acknowledgement of the post-audit `SA-013` re-derivation commitment;
 - the contact-independent method by which the evaluator will receive phase artifacts and return results;
 - any pre-output withdrawal/replacement event.
 
