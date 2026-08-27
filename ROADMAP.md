@@ -31,7 +31,7 @@ GET https://skills.sh/api/v1/skills?view=all-time&page=0&per_page=500
 
 The committed capture includes the unmodified response bytes, relevant response headers, retrieval time, request parameters, and SHA-256. The only fallback is an operator-provided capture of **that same authenticated endpoint and query**, with the same metadata and schema checks. A rendered page, search-engine result, another catalog, or a hand-built list is not an equivalent fallback. If neither path works, Rule 0 fires.
 
-All 500 ranked rows form the bounded Cycle 1 alternative-candidate universe. The cohort is produced by walking those rows in rank order until 100 canonical non-duplicate entities are accepted. Every encountered row and every group/skip decision remains in the manifest.
+All 500 ranked rows form the bounded Cycle 1 alternative-candidate universe. The cohort is produced by walking those rows in rank order until 100 canonical non-duplicate entities are accepted. Every encountered row and every group/skip decision remains in the manifest. The smoke subject is skipped during that walk and never becomes a cohort entity, so the 100-card denominators stay free of the one entity the pipeline was tuned on; because the subject is now chosen independently of the ranking rather than being its first row, it may or may not appear among the 500, and the walk simply continues past it when it does.
 
 Durable identity uses source type, source owner/repository or well-known provider, and actual skill path/slug. Content hash and repository commit identify an **observation version**, not the enduring entity. Display names never join records. Official duplicate flags, identical content, or a verified source move may support grouping; uncertain similarity alone may not. Unresolved identity uncertainty is reported and sensitivity-tested, not silently merged.
 
@@ -104,7 +104,7 @@ The binding output freeze is the first commit on `main` containing `experiments/
 
 ### Calibration, held-out sampling, and evaluator independence
 
-The smoke entity and ten calibration entities are excluded from every confirmatory audit. The calibration set is deterministically selected from the frozen cohort using `SHA-256(cohort_snapshot_sha256 || "skills-alternative-cycle-1-calibration-v1")`; its algorithm and exclusions are fixed before any adapter or synthesis tuning.
+The smoke entity and ten calibration entities are excluded from every confirmatory audit; the smoke entity is additionally excluded from the cohort itself. The calibration set is deterministically selected from the frozen cohort using `SHA-256(cohort_snapshot_sha256 || "skills-alternative-cycle-1-calibration-v1")`; its algorithm and exclusions are fixed before any adapter or synthesis tuning.
 
 Only the held-out **algorithm and rank-quartile strata** are precommitted. The actual 20 subjects remain unknowable until after the output-freeze commit. The seed is derived from:
 
@@ -216,15 +216,16 @@ role may be performed by whoever built the pipeline — is an evaluator-independ
 
 ### SA-002 — Emit one real card and a source-feasibility matrix
 
-- **Status:** Blocked (SA-001)
+- **Status:** Open
 - **Priority:** Critical
 - **Execution:** CLOUD RESEARCH
 - **Category:** Vertical slice
-- **Depends on:** SA-001
-- **Problem / question:** Can one highest-ranked row travel from upstream source through real external evidence into an inspectable card, and which sources are batch-feasible?
-- **Next experiment:** Use the highest-ranked input row as the fixed smoke subject. Attempt GitHub/upstream, skills.sh details/audits, SkillProof, Tessl, and one bounded external-experience search. Produce the smallest source-faithful observations, claims, baseline views, composite card, and alternatives that can carry the full path.
-- **Expected information gain:** Reveals join keys, authentication, allowed acquisition/storage, rate/search budgets, version relevance, lineage, and genuine missing data before schema work.
-- **Validation / acceptance:** The smoke card traces every sentence to an origin; failures are typed. A matrix records for every source: permitted path, auth, stable key, one positive/negative lookup where possible, expected coverage, rate/search limit, storage rights, replay status, and exact batch blocker. The smoke subject is permanently audit-ineligible.
+- **Depends on:** None
+- **Problem / question:** Can one skill travel from upstream source through real external evidence into an inspectable card, and which sources are batch-feasible?
+- **Why this does not depend on `SA-001`:** The cohort needs the frozen ranked input; this question does not. Whether a more useful card can be assembled at all from GitHub, SkillProof, Tessl and experience reports is answerable on any single public skill, and the answer is the same whichever one it is. Binding the vertical slice to the acquisition gate put the project's only end-to-end output behind a credential held outside the project, which is the state `AGENTS.md` warns about: formalisation stays available while nothing is ever emitted. The smoke subject is excluded from every confirmatory denominator, so choosing it without the ranked input cannot move any threshold.
+- **Next experiment:** Name one publicly listed skill as the fixed smoke subject and commit that choice **before inspecting any of its evidence**, recording the date and the reason it was picked. Pick for being ordinarily representative rather than for looking well covered, and state in the record which it is. Then attempt GitHub/upstream, skills.sh details/audits, SkillProof, Tessl, and one bounded external-experience search. Produce the smallest source-faithful observations, claims, baseline views, composite card, and alternatives that can carry the full path. Do not define, touch or pre-empt the cohort or the candidate universe here; the alternatives produced are an ad hoc feasibility probe, not the frozen method, which `SA-009` owns.
+- **Expected information gain:** Reveals join keys, authentication, allowed acquisition/storage, rate/search budgets, version relevance, lineage, and genuine missing data before schema work — and does so before the acquisition gate resolves, so a source that cannot be joined at all is discovered while the protocol is still cheap to change.
+- **Validation / acceptance:** The subject was committed before its evidence was inspected. The smoke card traces every sentence to an origin; failures are typed. A matrix records for every source: permitted path, auth, stable key, one positive/negative lookup where possible, expected coverage, rate/search limit, storage rights, replay status, and exact batch blocker, and marks which findings are specific to this subject rather than general — a probe run on an unusually well-covered skill overstates feasibility. The smoke subject is permanently audit-ineligible and never becomes a cohort entity.
 - **Artifacts / docs:** `experiments/cycle-1/smoke/`, `docs/source-access.md`
 - **Estimated scope:** Small
 
@@ -269,7 +270,7 @@ role may be performed by whoever built the pipeline — is an evaluator-independ
 - **Category:** Identity / cohort
 - **Depends on:** SA-001, SA-004
 - **Problem / question:** Can ranked rows be joined to stable skill entities without duplicate inflation or evidence crossing identities?
-- **Next experiment:** Freeze the initial canonicalization output before review. Canonicalize all 500 candidate-universe rows, then walk them to 100 accepted cohort entities; preserve all rejected/grouped rows, assign the cohort's primary taxonomy category using upstream author material only, and select the ten calibration entities. Audit every uncertain cohort identity plus a deterministic 20-entity cohort sample and 30-row candidate-universe sample; preserve initial errors and corrections.
+- **Next experiment:** Freeze the initial canonicalization output before review. Canonicalize all 500 candidate-universe rows, then walk them to 100 accepted cohort entities, skipping the `SA-002` smoke subject if it appears; preserve all rejected/grouped rows, assign the cohort's primary taxonomy category using upstream author material only, and select the ten calibration entities. Audit every uncertain cohort identity plus a deterministic 20-entity cohort sample and 30-row candidate-universe sample; preserve initial errors and corrections.
 - **Expected information gain:** Measures false joins/splits and category/publisher concentration before source evidence can influence membership.
 - **Validation / acceptance:** Exactly 500 ranked rows resolve to canonical candidate identities/groups and exactly 100 cohort entities are accepted; every decision has evidence. More than two errors in the 20-entity cohort audit or more than three in the 30-row universe audit requires a full rerun and new pre-evidence freeze; more than five unresolved cohort membership ambiguities fires Rule 0. Report initial/corrected error rates and merge/split sensitivity. Smoke/calibration exclusions are committed.
 - **Artifacts / docs:** `00-inputs/cohort/`, `manifests/cohort.json`, `00-inputs/identity-audit.md`
