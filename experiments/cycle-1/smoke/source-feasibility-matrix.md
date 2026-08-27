@@ -13,7 +13,7 @@ listed skills, so coverage seen here is a **floor** for the ranked-head cohort, 
 
 | Source | Permitted path | Auth | Stable key | Lookup result | Rate / budget | Storage rights | Replay status | Batch blocker | Kind |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| skills.sh listing (rendered) | `Allow: /` — the page, unlike `/api/`, is not disallowed | none | `/{owner}/{repo}/{skill}` | **positive**, 200 | not stated for pages | caching "encouraged and not restricted" | `stored` | none for one page; unknown politeness budget at 100× | general |
+| skills.sh listing (rendered) | `Allow: /` — the page, unlike `/api/`, is not disallowed | none | `/{owner}/{repo}/{skill}` | **positive**, 200 | not stated for pages | caching "encouraged and not restricted" **for skills.sh's own material only** — it does not own or relicense skill content | extracted fields `stored`; **the page itself `metadata_only`, not replayable** | **the page cannot be archived** — it embeds the author's SKILL.md body, so capture must extract fields at fetch time; plus unknown politeness budget at 100× | general |
 | skills.sh API | `Disallow: /api/`, but the provider documents these endpoints and issues credentials, so authenticated use is sanctioned | **Vercel OIDC bearer** | `/api/v1/skills/...` | not attempted — no token | 600 req/min per (team, project) | as above | `stored` | **credential held outside the project** (`SA-001`) | general |
 | GitHub upstream — content | anonymous git read via the session proxy | none | `{owner}/{repo}@{commit}:{path}` | **positive**, clone at `2a0e09d8` | not hit | **depends on the repo's licence** | `externally_immutable` | none technically; per-repo licence must be checked before storing | general |
 | GitHub upstream — REST API | blocked in this session | session repo scope | `/repos/{owner}/{repo}` | **403** — "GitHub access to this repository is not enabled for this session" | 60/h unauthenticated in general | n/a | n/a | **API metadata unavailable for third-party repos without attaching each one**; content path is unaffected | general |
@@ -30,6 +30,21 @@ version-relevance half of the rule. The audited revision appears to be reachable
 `/api/v1/skills/audit/{source}/{skill}` — behind the same Vercel OIDC credential as `SA-001`. So the
 metric most likely to carry the cohort is gated on the acquisition credential even though the
 listing itself is not.
+
+**A listing page cannot be archived just because the catalogue permits caching.** skills.sh renders
+the author's SKILL.md body inside its own page, and its terms say plainly that it does not own, host
+or relicense skill content. Its permission to cache therefore covers its own metadata — counts,
+dates, audit verdicts — and stops at the embedded body. The consequence for `SA-006`/`SA-007` is
+structural: the adapter must **extract fields at fetch time** rather than archive responses, and the
+page itself can only ever be `metadata_only`, which the contract says is not replayable. So the
+provenance chain for this comparator rests on extracted fields plus a response hash, not on a
+replayable capture.
+
+It also constrains the baseline. A comparator view may not omit awkward content, and none was
+omitted — but for an unlicensed upstream, "complete" can only mean field-complete **by reference**,
+not verbatim reproduction. `SA-003` has to decide whether the comparator-completeness contract, and
+`B1` with it, is satisfied by reference, because otherwise no unlicensed subject can ever produce a
+complete baseline.
 
 **Storage rights are per-repository, not per-source.** The subject's upstream has no licence at all,
 so its content could not be stored and had to be referenced by commit coordinate. A batch run cannot

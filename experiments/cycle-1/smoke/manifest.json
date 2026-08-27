@@ -4,19 +4,20 @@
     "02-claims": "normalized propositions with conditions and lineage",
     "03-cards": "composite card plus the single available baseline view"
   },
+  "licence_boundary": "No third-party skill content is stored in this repository. The upstream carries no licence and the skills.sh listing embeds that same body, so both are referenced by coordinate; only skills.sh's own metadata is stored. Verified by scanning every artifact for 71 distinctive upstream lines: 0 present.",
   "manual_intervention": "This slice was produced by hand, not by a frozen producer. It is smoke/calibration work and is excluded from T1 per the roadmap.",
   "observation_version": "2a0e09d8cb9056e044c473dd53a136b81ba428e9",
   "output_sha256": {
-    "01-observations/captures/skills-sh-detail.html": "d466785174dd62f5b646372f96f1dcc5e27a06eee1745d266c38182ac025551a",
-    "01-observations/observations.jsonl": "2c275b07fb20b5b589b6ce92c04d856c5feffd31d9acc1a0fa55839076976f2a",
+    "01-observations/captures/skills-sh-extracted.json": "5e02f4c6afdd18d715ac784864d8f85905029e1de798037d5e16a752db693342",
+    "01-observations/observations.jsonl": "98e613f106a05cf1ffe86608a55e034d532c85650117f2ffbf836de19cc55833",
     "02-claims/claims.jsonl": "383337df060182f73cfdced996a2e780198d45056551b2f80ac44a6615e700cb",
-    "03-cards/baselines/skills-sh.md": "bd2ae7abb5a1accbc361870e54fef38402610ee76079c455e9112054789aa878",
+    "03-cards/baselines/skills-sh.md": "f6cb878e50d0e86f2231666b7390762be81b0577318ea133cd1080cb02facd53",
     "03-cards/sound-fx.md": "1d5eaf792e6b80087845c6ddd701bdfdfe388251d959ae89af3594ff675e5922",
     "selection.json": "2de51d87b8677aee81b663cceab2d0d7642334b8d1462f974b3da68655a88aea",
-    "source-feasibility-matrix.md": "8e481adfc7691a8287a293b311b0a4017c526790566a4d9bae9a5d06c4e9c0b7",
+    "source-feasibility-matrix.md": "a2f90668aafbabfca78cf810d105a66ee5337f9c593d07a6eabec8e02f808af5",
     "subject.md": "1309b3253237fd4d99ef73d22243109dc6fef3b6e696b51ca4d620dd6b544177"
   },
-  "produced_at_utc": "2026-08-27T13:46:06Z",
+  "produced_at_utc": "2026-08-27T14:32:26Z",
   "producer": "SA-002 smoke slice, manual agent run",
   "smoke_subject": "noizai/skills/sound-fx"
 }
