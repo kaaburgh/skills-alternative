@@ -216,7 +216,7 @@ role may be performed by whoever built the pipeline — is an evaluator-independ
 
 ### SA-002 — Emit one real card and a source-feasibility matrix
 
-- **Status:** Open
+- **Status:** Completed and verified
 - **Priority:** Critical
 - **Execution:** CLOUD RESEARCH
 - **Category:** Vertical slice
@@ -226,7 +226,8 @@ role may be performed by whoever built the pipeline — is an evaluator-independ
 - **Next experiment:** Name one publicly listed skill as the fixed smoke subject and commit that choice **before inspecting any of its evidence**, recording the date and the reason it was picked. Pick for being ordinarily representative rather than for looking well covered, and state in the record which it is. Then attempt GitHub/upstream, skills.sh details/audits, SkillProof, Tessl, and one bounded external-experience search. Produce the smallest source-faithful observations, claims, baseline views, composite card, and alternatives that can carry the full path. Do not define, touch or pre-empt the cohort or the candidate universe here; the alternatives produced are an ad hoc feasibility probe, not the frozen method, which `SA-009` owns.
 - **Expected information gain:** Reveals join keys, authentication, allowed acquisition/storage, rate/search budgets, version relevance, lineage, and genuine missing data before schema work — and does so before the acquisition gate resolves, so a source that cannot be joined at all is discovered while the protocol is still cheap to change.
 - **Validation / acceptance:** The subject was committed before its evidence was inspected. The smoke card traces every sentence to an origin; failures are typed. A matrix records for every source: permitted path, auth, stable key, one positive/negative lookup where possible, expected coverage, rate/search limit, storage rights, replay status, and exact batch blocker, and marks which findings are specific to this subject rather than general — a probe run on an unusually well-covered skill overstates feasibility. The smoke subject is permanently ineligible for every confirmatory audit, whether or not the frozen ranking later places it in the cohort.
-- **Artifacts / docs:** `experiments/cycle-1/smoke/`, `docs/source-access.md`
+- **Outcome:** Executed 2026-08-27 on smoke subject `noizai/skills/sound-fx`, drawn deterministically from all 20,000 listed skills and committed before any of its evidence was retrieved. One composite card exists, every sentence citing a claim and every claim an observation with an immutable coordinate. Both mandatory comparators returned `not_covered` with their positive paths separately proven, so this subject is carried by skills.sh alone; that is a coverage floor from a catalogue-wide draw, not an estimate for the ranked-head cohort. The sharpest finding is that skills.sh republishes three non-author security verdicts without stating the revision each scanned, so the shape `E1` wants is present while its version-relevance half fails, and the audited revision appears reachable only through the authenticated endpoint gated by `SA-001`. Storage rights proved to be per-repository rather than per-source: the subject's upstream carries no licence, so its content is referenced by commit coordinate instead of stored. No source-feasibility Kill: every enabled source was reached, keyed and typed.
+- **Artifacts / docs:** `experiments/cycle-1/smoke/`, `experiments/cycle-1/smoke/source-feasibility-matrix.md`
 - **Estimated scope:** Small
 
 ### SA-003 — Freeze protocol, comparators, rubrics, search, taxonomy, and decision rule
