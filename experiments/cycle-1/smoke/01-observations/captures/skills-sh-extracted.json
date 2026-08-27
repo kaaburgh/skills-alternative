@@ -1,0 +1,27 @@
+{
+  "_note": "Field extraction, not a page archive. The skills.sh listing embeds the author's SKILL.md body verbatim, and skills.sh states it does not own, host or relicense skill content, so its permission to cache results cannot extend to that body. Only skills.sh's own metadata about the entity is retained here. The author's description, trigger list and quick-start examples are deliberately NOT reproduced; they remain available at the native coordinate and at the upstream commit.",
+  "native_coordinate": "https://www.skills.sh/noizai/skills/sound-fx",
+  "retrieved_at_utc": "2026-08-27T13:38:00Z",
+  "response_sha256": "d466785174dd62f5b646372f96f1dcc5e27a06eee1745d266c38182ac025551a",
+  "response_bytes": 73872,
+  "page_capture_label": "metadata_only",
+  "page_replayable": false,
+  "extracted_fields_label": "stored",
+  "skills_sh_own_metadata": {
+    "installs": 326,
+    "github_stars": 523,
+    "first_seen": "2026-04-18",
+    "repository": "noizai/skills",
+    "install_command": "npx skills add https://github.com/noizai/skills --skill sound-fx",
+    "security_audits": [
+      {"provider": "Gen Agent Trust Hub", "verdict": "Pass", "revision_audited": null},
+      {"provider": "Socket", "verdict": "Pass", "revision_audited": null},
+      {"provider": "Snyk", "verdict": "Pass", "revision_audited": null}
+    ]
+  },
+  "author_owned_fields_present_but_not_reproduced": [
+    "skill name and description",
+    "trigger list",
+    "quick-start command examples"
+  ]
+}
