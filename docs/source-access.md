@@ -20,6 +20,7 @@ References:
 
 - https://www.skills.sh/docs/api
 - https://github.com/vercel/vercel-py#readme
+- https://www.skills.sh/vercel-labs/agent-browser/protected-vercel-deployments
 
 The unattended GitHub runtime currently has neither a Vercel project identity nor Vercel credentials, so it cannot mint that token itself. The generic execution sandbox also currently fails outbound DNS. These are environment-specific acquisition blockers, not evidence that skills.sh is unavailable and not a Rule 0 result.
 
@@ -27,16 +28,13 @@ The unattended GitHub runtime currently has neither a Vercel project identity no
 
 `scripts/capture_skills_sh.py` performs only the fixed request above. It reads `VERCEL_OIDC_TOKEN` from the process environment, never accepts the token as a command-line argument, never writes it, and refuses to overwrite a successful capture.
 
-On a machine already authenticated to Vercel, first verify the intended account/project and use a current Vercel CLI. Current Vercel tooling supports obtaining a short-lived development token with `vc project token <project-name>`. With CLI 53.3.0 or newer, a bounded invocation is:
+On a machine already authenticated to Vercel, first verify the intended account/project. The skills.sh-documented local path is `vercel link` followed by `vercel env pull`; current Vercel SDK documentation also exposes `vc project token <project-name>` as a way to obtain a short-lived development OIDC token. Make the token available to the helper as `VERCEL_OIDC_TOKEN` using a secret-safe local mechanism, then run:
 
 ```bash
-vc whoami
-vc --version
-VERCEL_OIDC_TOKEN="$(vc project token <project-name>)" \
-  python3 scripts/capture_skills_sh.py
+python3 scripts/capture_skills_sh.py
 ```
 
-If `vc project token` is unavailable in the installed CLI, use the skills.sh-documented `vercel link` + `vercel env pull` path instead, taking care not to commit `.env.local` or any other pulled environment value.
+Do not paste the token into a command argument, commit `.env.local`, or print the token into logs. If using `vc project token`, use Vercel CLI 53.3.0 or newer before capturing its stdout: Vercel-maintained guidance records that CLI 50.25.0 through 53.2.x could emit this credential on stderr. Upgrade instead of trying to recover a token from stderr.
 
 A successful run writes:
 
