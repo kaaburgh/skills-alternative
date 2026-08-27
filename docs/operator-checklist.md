@@ -29,11 +29,27 @@ Ready now in the sense that only a human can do it: skills.sh authenticates with
 bound to a Vercel team and project, and the provider documents no API key, signup or unauthenticated
 tier. The token is an organisational identity no agent sandbox can mint.
 
-Obtaining the token, once, in a Vercel project you control — Settings → OIDC Federation → enable:
+Obtaining the token, once, in a Vercel project you control — Settings → OIDC Federation → enable.
+
+**Do this outside this repository.** `vercel link` and `vercel env pull` write into the current
+directory — a `.vercel/` directory and a `.env.local` holding a live bearer credential. Run them in a
+scratch directory instead, so the token never enters the working tree of a repository whose whole
+purpose is publishable evidence:
 
 ```bash
-npm i -g vercel && vercel link && vercel env pull   # writes VERCEL_OIDC_TOKEN to .env.local
+npm i -g vercel
+mkdir -p "$(mktemp -d)" && cd "$_"        # scratch directory, outside this repo
+vercel link                                # link it to your Vercel project
+vercel env pull                            # writes .env.local here, not in the repo
+set -a; . ./.env.local; set +a             # export VERCEL_OIDC_TOKEN into the environment
+cd -                                       # back to the repository, token in the environment
 ```
+
+The token is short-lived — roughly twelve hours — and is only ever needed in the environment of the
+capture command. Do not copy it into the repository, a shell history file, or a command argument.
+A `.gitignore` covering `.env*` and `.vercel/` exists as a backstop, but the instruction above is the
+actual control: an ignore rule protects one repository, while keeping the credential out of the tree
+protects it everywhere.
 
 The request itself is the one fixed in the experiment contract:
 `GET https://skills.sh/api/v1/skills?view=all-time&page=0&per_page=500`, with the token as a bearer
