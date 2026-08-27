@@ -1,0 +1,8 @@
+# Credentials must never enter the working tree of an evidence repository.
+# The operator handoff deliberately obtains the Vercel OIDC token outside this
+# directory (see docs/operator-checklist.md); these rules are the backstop for
+# when that instruction is not followed exactly.
+.env
+.env.*
+!.env.example
+.vercel/
